@@ -85,7 +85,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         for (ItemStack s : handler.getStacks()) {
             Item i = s.getItem();
             if (i == Items.GREEN_STAINED_GLASS_PANE) { containsQuests = true; } // Available quest
-            if (i == Items.RED_STAINED_GLASS_PANE) { containsQuests = true; } // Available quest
+            //if (i == Items.RED_STAINED_GLASS_PANE) { containsQuests = true; } // Available quest (ALSO IN STASH)
             if (i == Items.ORANGE_STAINED_GLASS_PANE) { // Accepted quest
                 containsQuests = true;
                 ComponentMap c = s.getComponents();
