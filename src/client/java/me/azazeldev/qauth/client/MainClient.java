@@ -44,6 +44,7 @@ public class MainClient implements ClientModInitializer {
 
 
     private static final Identifier HOTBAR_TEXTURE = Identifier.of("qauth", "textures/gui/hotbar_texture.png");
+    public static KeyBinding dropstack;
 
     @Override
     public void onInitializeClient() {
@@ -150,6 +151,14 @@ public class MainClient implements ClientModInitializer {
                 i += 1;
             }
         });
+
+
+        dropstack = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.qauth.dropstack",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_X,
+                "category.qauth.shortcuts"
+        ));
     }
 
     public static void popSlots() {

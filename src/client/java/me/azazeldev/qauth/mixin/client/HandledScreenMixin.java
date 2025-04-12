@@ -1,10 +1,13 @@
 package me.azazeldev.qauth.mixin.client;
 
 import me.azazeldev.qauth.client.MainClient;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.component.ComponentMap;
+import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.Item;
@@ -12,7 +15,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,6 +38,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Shadow
     protected T handler;
 
+    @Shadow @Nullable protected Slot focusedSlot;
+
     protected HandledScreenMixin(Text title) {
         super(title);
     }
@@ -47,6 +54,19 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         MainClient.popSlots();
     }
 
+    @Inject(method = "keyPressed", at = @At("TAIL"))
+    private void onKey(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+        if (keyCode == MainClient.dropstack.boundKey.getCode() && focusedSlot != null && focusedSlot.hasStack()) {
+            client.interactionManager.clickSlot(
+                    handler.syncId,
+                    focusedSlot.id,
+                    1,
+                    SlotActionType.THROW,
+                    client.player
+            );
+        }
+    }
+
     @Inject(method = "drawSlot", at = @At("HEAD"))
     private void onDrawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
         if (slot != null) {
@@ -59,7 +79,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
                         0xA800FF00
                 );
             }
-            if (!MainClient.isFull(client.player.getInventory())) {
+            /*if (!MainClient.isFull(client.player.getInventory())) { // IS USELESS D:
                 for (Pair<Integer, Integer> p : MainClient.unowned) {
                     context.fill(
                             p.getA(), p.getB(),
@@ -67,7 +87,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
                             0xA80000FF
                     );
                 }
-            }
+            }*/
             for (Pair<Integer, Integer> p : MainClient.full) {
                 context.fill(
                         p.getA(), p.getB(),
@@ -85,13 +105,20 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         for (ItemStack s : handler.getStacks()) {
             Item i = s.getItem();
             if (i == Items.GREEN_STAINED_GLASS_PANE) { containsQuests = true; } // Available quest
-            //if (i == Items.RED_STAINED_GLASS_PANE) { containsQuests = true; } // Available quest (ALSO IN STASH)
+            if (i == Items.RED_STAINED_GLASS_PANE) { containsQuests = true; } // Available quest (ALSO IN STASH)
+            if (i == Items.GOLD_NUGGET && containsQuests) { // Upgrades (like stash and hideout)
+                ComponentMap c = s.getComponents();
+                Text name = c.get(DataComponentTypes.CUSTOM_NAME);
+                if (name.getLiteralString() != "Gold Nugget") {
+                    quests.put(name, c.get(DataComponentTypes.LORE));
+                }
+            }
             if (i == Items.ORANGE_STAINED_GLASS_PANE) { // Accepted quest
                 containsQuests = true;
                 ComponentMap c = s.getComponents();
                 quests.put(c.get(DataComponentTypes.CUSTOM_NAME), c.get(DataComponentTypes.LORE));
             }
         }
-        if (containsQuests) MainClient.quests.put(super.getTitle(), quests);
+        if (containsQuests && !quests.isEmpty()) MainClient.quests.put(super.getTitle(), quests);
     }
 }

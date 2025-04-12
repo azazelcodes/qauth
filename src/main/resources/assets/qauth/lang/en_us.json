@@ -3,5 +3,8 @@
   "key.qauth.qswitchf" : "Switch Quest Forward",
   "key.qauth.qswitchb" : "Switch Quest Backward",
   "key.qauth.qgswitchf" : "Switch Giver Forward",
-  "key.qauth.qgswitchb" : "Switch Giver Backward"
+  "key.qauth.qgswitchb" : "Switch Giver Backward",
+
+  "category.qauth.shortcuts" : "Shortcuts",
+  "key.qauth.dropstack" : "Drop Stack"
 }
