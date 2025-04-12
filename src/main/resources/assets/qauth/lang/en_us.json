@@ -1,0 +1,7 @@
+{
+  "category.qauth.quests" : "Quests",
+  "key.qauth.qswitchf" : "Switch Quest Forward",
+  "key.qauth.qswitchb" : "Switch Quest Backward",
+  "key.qauth.qgswitchf" : "Switch Giver Forward",
+  "key.qauth.qgswitchb" : "Switch Giver Backward"
+}
