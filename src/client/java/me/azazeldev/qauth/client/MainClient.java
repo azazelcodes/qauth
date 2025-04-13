@@ -14,16 +14,14 @@ import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import oshi.util.tuples.Pair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class MainClient implements ClientModInitializer {
     private static Screen lastScreen = null;
@@ -45,6 +43,18 @@ public class MainClient implements ClientModInitializer {
 
     private static final Identifier HOTBAR_TEXTURE = Identifier.of("qauth", "textures/gui/hotbar_texture.png");
     public static KeyBinding dropstack;
+
+
+    public static HashMap<String, HashMap<Integer, ItemStack>> containers = new HashMap<>();
+    public static boolean renderContainers = true;
+
+
+
+    public static HashMap<Integer, ItemStack> stash = new HashMap<>(); // Index[Item,[x,y]]
+    public static ArrayList<Pair<Integer, Integer>> stashable = new ArrayList<>();
+    public static boolean containsStashable = false;
+
+    public static ArrayList<String> npcs = new ArrayList<>(List.of("Ragman", "Therapist", "Mechanic"));
 
     @Override
     public void onInitializeClient() {
@@ -150,6 +160,44 @@ public class MainClient implements ClientModInitializer {
                 );
                 i += 1;
             }
+
+
+
+
+
+            if (!stash.isEmpty()) {
+                int k = 0;
+                context.drawTexture(
+                        RenderLayer::getGuiTexturedOverlay,
+                        HOTBAR_TEXTURE,
+                        screenWidth - 16 - 9*22 - 3, 22 - 3,
+                        0f, 0f,
+                        9*22, 5*22,
+                        22, 22
+                );
+
+                for (Map.Entry<Integer, ItemStack> e : stash.entrySet()) {
+                    if (e.getKey() % 9 == 0) k += 1;
+                    int ix = screenWidth - 16 - (k * 9 - e.getKey()) * 22;
+                    int iy = k * 22;
+                    context.drawItem(e.getValue(), ix, iy);
+
+                    int c = e.getValue().getCount();
+                    if (c > 1) {
+                        context.getMatrices().push();
+                        context.getMatrices().translate(0, 0, 200); // DRAW TEXT OVER ITEM
+
+                        context.drawText(
+                                client.textRenderer,
+                                Text.literal(String.valueOf(c)),
+                                ix, iy,
+                                0xA8FFFFFF, true
+                        );
+
+                        context.getMatrices().pop();
+                    }
+                }
+            }
         });
 
 
@@ -165,6 +213,8 @@ public class MainClient implements ClientModInitializer {
         full = new ArrayList<>();
         same = new ArrayList<>();
         unowned = new ArrayList<>(); // because new doesn't work >:(
+        stashable = new ArrayList<>();
+        containsStashable = false;
 
 
         HashMap<Item, ArrayList<Pair<Integer, Integer>>> cont = new HashMap<>();
@@ -179,10 +229,33 @@ public class MainClient implements ClientModInitializer {
             for (int i = 0; i < invCutoff; i++) {
                 Slot slot = handledScreen.getScreenHandler().slots.get(i);
                 ItemStack stack = slot.getStack();
+
                 if (!stack.isEmpty()) {
                     ArrayList<Pair<Integer, Integer>> list = cont.getOrDefault(stack.getItem(), new ArrayList<>());
                     list.add(new Pair<>(slot.x, slot.y));
                     cont.put(stack.getItem(), list);
+                }
+
+                // STASH
+                if (
+                        handledScreen.getTitle().getString().equals("Stash")
+                        && stack.getItem() != Items.RED_STAINED_GLASS_PANE
+                        && !stack.getName().getString().contains("Page")
+                        && !stack.getName().getString().contains("Upgrade")
+                ) {
+                    stash.put(i, stack);
+                } else if (
+                        !handledScreen.getTitle().getString().equals("Stash")
+                ) {
+                    for (ItemStack is : stash.values()) {
+                        if (is.getItem().equals(stack.getItem()) && !is.isEmpty()) {
+                            containsStashable = true;
+                            // ADD A NPC CHECK HERE
+                            // basically just look if npc.contains(handledScreen.getTitle())
+                            // then if so dont count the last two rows (18 slots)
+                            stashable.add(new Pair<>(slot.x, slot.y));
+                        }
+                    }
                 }
             }
 
