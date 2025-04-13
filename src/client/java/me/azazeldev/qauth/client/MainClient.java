@@ -172,9 +172,6 @@ public class MainClient implements ClientModInitializer {
 
         if (currentScreen instanceof HandledScreen<?> handledScreen && currentScreen != lastScreen) {
             //lastScreen = currentScreen;
-
-            System.out.println("Container opened!");
-
             int totalSlots = handledScreen.getScreenHandler().slots.size();
             invCutoff = totalSlots - 36; // Usually last 36 slots are player inventory
 

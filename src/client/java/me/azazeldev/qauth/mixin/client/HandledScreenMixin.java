@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import oshi.util.tuples.Pair;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen {
@@ -109,7 +110,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             if (i == Items.GOLD_NUGGET && containsQuests) { // Upgrades (like stash and hideout)
                 ComponentMap c = s.getComponents();
                 Text name = c.get(DataComponentTypes.CUSTOM_NAME);
-                if (name.getLiteralString() != "Gold Nugget") {
+                if (!Objects.equals(name.getLiteralString(), i.getName().getLiteralString())) {
                     quests.put(name, c.get(DataComponentTypes.LORE));
                 }
             }
