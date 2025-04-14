@@ -23,9 +23,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import oshi.util.tuples.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen {
@@ -95,32 +99,32 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
             for (Pair<Integer, Integer> p : MainClient.same) {
                 context.fill(
-                        p.getA(), p.getB(),
-                        p.getA() + 16, p.getB() + 16,
+                        p.getKey(), p.getValue(),
+                        p.getKey() + 16, p.getValue() + 16,
                         0xA800FF00
                 );
             }
             /*if (!MainClient.isFull(client.player.getInventory())) { // IS USELESS D:
                 for (Pair<Integer, Integer> p : MainClient.unowned) {
                     context.fill(
-                            p.getA(), p.getB(),
-                            p.getA() + 16, p.getB() + 16,
+                            p.getKey(), p.getValue(),
+                            p.getKey() + 16, p.getValue() + 16,
                             0xA80000FF
                     );
                 }
             }*/
             for (Pair<Integer, Integer> p : MainClient.full) {
                 context.fill(
-                        p.getA(), p.getB(),
-                        p.getA() + 16, p.getB() + 16,
+                        p.getKey(), p.getValue(),
+                        p.getKey() + 16, p.getValue() + 16,
                         0xA8FF0000
                 );
             }
 
             for (Pair<Integer, Integer> p : MainClient.stashable) {
                 context.fill(
-                        p.getA(), p.getB(),
-                        p.getA() + 16, p.getB() + 16,
+                        p.getKey(), p.getValue(),
+                        p.getKey() + 16, p.getValue() + 16,
                         0xA85D3FD3
                 );
             }
@@ -149,5 +153,57 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             }
         }
         if (containsQuests && !quests.isEmpty()) MainClient.quests.put(title, quests);
+
+
+
+        if (title.equals("Generator")) {
+            // slot 3 contains timer
+        }
+
+        if (title.contains("Station") && !title.contains("Recipes")) {
+            int totalSlots = handler.slots.size();
+            int invCutoff = totalSlots - 36; // Usually last 36 slots are player inventory
+
+            for (int i = 7; i < invCutoff; i+=18) { // only column 7, every two rows
+                Slot slot = handler.slots.get(i);
+                ItemStack stack = slot.getStack();
+                if (stack.getItem() != Items.RED_STAINED_GLASS_PANE && !stack.isEmpty()) {
+                    LoreComponent lore = stack.getComponents().get(DataComponentTypes.LORE);
+                    String timer = lore.lines().getLast().getString();
+
+                    int hours = 0, minutes = 0, seconds = 0;
+
+                    Pattern pattern = Pattern.compile("(\\d+)h|\\s*(\\d+)m|\\s*(\\d+)s");
+                    Matcher matcher = pattern.matcher(timer);
+
+                    while (matcher.find()) {
+                        if (matcher.group(1) != null) {
+                            hours = Integer.parseInt(matcher.group(1));
+                        } else if (matcher.group(2) != null) {
+                            minutes = Integer.parseInt(matcher.group(2));
+                        } else if (matcher.group(3) != null) {
+                            seconds = Integer.parseInt(matcher.group(3));
+                        }
+                    }
+
+                    Duration duration = Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
+                    long currentUnixTime = Instant.now().getEpochSecond();
+                    long futureUnixTime = currentUnixTime + duration.getSeconds();
+
+                    Pair<String, Integer> identifier = Pair.of(title, i);
+                    if (MainClient.crafting.containsKey(identifier)) {
+                        MainClient.crafting.replace(
+                                identifier,
+                                Pair.of(stack, futureUnixTime)
+                        );
+                    } else {
+                        MainClient.crafting.put(
+                                identifier,
+                                Pair.of(stack, futureUnixTime)
+                        );
+                    }
+                }
+            }
+        }
     }
 }

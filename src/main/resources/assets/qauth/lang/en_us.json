@@ -4,7 +4,9 @@
   "key.qauth.qswitchb" : "Switch Quest Backward",
   "key.qauth.qgswitchf" : "Switch Giver Forward",
   "key.qauth.qgswitchb" : "Switch Giver Backward",
+  "key.qauth.qrm" : "Remove Selected",
 
   "category.qauth.shortcuts" : "Shortcuts",
-  "key.qauth.dropstack" : "Drop Stack"
+  "key.qauth.dropstack" : "Drop Stack",
+  "key.qauth.togglecont" : "Toggle Stash"
 }

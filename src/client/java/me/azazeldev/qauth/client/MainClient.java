@@ -19,8 +19,9 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
-import oshi.util.tuples.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.time.Instant;
 import java.util.*;
 
 public class MainClient implements ClientModInitializer {
@@ -39,6 +40,7 @@ public class MainClient implements ClientModInitializer {
     public static HashMap<String, HashMap<Text, LoreComponent>> quests = new HashMap<>(); // NPC_NAME{QUEST_NAME, QUEST_DESCRIPTION}
     public static int qIndex = 0;
     public static int qgIndex = 0;
+    private static KeyBinding qrm;
 
 
     private static final Identifier HOTBAR_TEXTURE = Identifier.of("qauth", "textures/gui/hotbar_texture.png");
@@ -55,6 +57,10 @@ public class MainClient implements ClientModInitializer {
     public static boolean containsStashable = false;
 
     public static ArrayList<String> npcs = new ArrayList<>(List.of("Ragman", "Therapist", "Mechanic"));
+    public static HashMap<Pair<String, Integer>, Pair<ItemStack, Long>> crafting = new HashMap<>(); // [Name,Index][Item,EndTime]
+
+
+    private static KeyBinding toggleCont;
 
     @Override
     public void onInitializeClient() {
@@ -63,16 +69,16 @@ public class MainClient implements ClientModInitializer {
 
 
             Text selectedQG = getSelectedQG();
-            while (qSwitchF.wasPressed()) {
-                if (qIndex+1 < quests.get(selectedQG).size()) {
+            while (qSwitchF.wasPressed() && !quests.isEmpty()) {
+                if (qIndex+1 < quests.get(selectedQG.getString()).size()) {
                     qIndex += 1;
                 } else {
                     qIndex = 0;
                 }
             }
-            while (qSwitchB.wasPressed()) {
+            while (qSwitchB.wasPressed() && !quests.isEmpty()) {
                 if (qIndex-1 < 0) {
-                    qIndex = quests.get(selectedQG).size()-1;
+                    qIndex = quests.get(selectedQG.getString()).size()-1;
                 } else {
                     qIndex -= 1;
                 }
@@ -93,6 +99,16 @@ public class MainClient implements ClientModInitializer {
                 } else {
                     qgIndex -= 1;
                 }
+            }
+
+            while (qrm.wasPressed() && !quests.isEmpty()) {
+                quests.get(selectedQG.getString()).remove(getSelectedQ().getKey(), getSelectedQ().getValue());
+                if (quests.get(selectedQG.getString()).isEmpty()) quests.remove(selectedQG.getString());
+                if (qgIndex > quests.size()-1) qgIndex = quests.size()-1;
+            }
+
+            while (toggleCont.wasPressed()) {
+                renderContainers = !renderContainers;
             }
         });
 
@@ -123,20 +139,17 @@ public class MainClient implements ClientModInitializer {
                 "category.qauth.quests"
         ));
 
+        qrm = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.qauth.qrm",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_KP_5,
+                "category.qauth.quests"
+        ));
+
         HudRenderCallback.EVENT.register((context, delta) -> {
             MinecraftClient client = MinecraftClient.getInstance();
-            // Get screen width and height
             int screenWidth = client.getWindow().getScaledWidth();
             int screenHeight = client.getWindow().getScaledHeight();
-
-            /*context.drawTexture(
-                    RenderLayer::getGuiTexturedOverlay,
-                    HOTBAR_TEXTURE,
-                    screenWidth - 22 - 7, 7,
-                    0f, 0f,
-                    22, 22,
-                    22, 22
-            );*/
 
             context.drawText(
                     client.textRenderer,
@@ -198,6 +211,46 @@ public class MainClient implements ClientModInitializer {
                     }
                 }
             }
+
+
+            int k = 0;
+            int r = -1;
+            for (Pair<ItemStack, Long> e : crafting.values()) {
+                if (k % 3 == 0) r += 1;
+                int ix = (screenWidth - (k+1)*48) + r*3*48; // basically screen - amount of items but + every third I add the same as I subtract so its the same??
+                int iy = 7 + ((!stash.isEmpty() && renderContainers) ? 128 : 0) + r*(22+16);
+                context.drawItem(
+                        e.getKey(),
+                        ix, iy
+                );
+
+                long currentUnixTime = Instant.now().getEpochSecond();
+                int totalSeconds = (int) (e.getValue() - currentUnixTime);
+                int hours = totalSeconds / 3600;
+                int minutes = (totalSeconds % 3600) / 60;
+                int seconds = totalSeconds % 60;
+
+                context.getMatrices().push();
+                context.getMatrices().translate(0, 0, 200); // DRAW TEXT OVER ITEM
+                if (totalSeconds > 1) {
+                    context.drawText(
+                            client.textRenderer,
+                            Text.literal(String.format("%d:%02d:%02d", hours, minutes, seconds)),
+                            ix, iy + 22,
+                            0xA8FFFFFF, true
+                    );
+                } else {
+                    context.drawText(
+                            client.textRenderer,
+                            Text.literal("DONE!"),
+                            ix, iy + 22,
+                            0xFFFFFFFF, true
+                    );
+                }
+                context.getMatrices().pop();
+
+                k += 1;
+            }
         });
 
 
@@ -205,6 +258,13 @@ public class MainClient implements ClientModInitializer {
                 "key.qauth.dropstack",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_X,
+                "category.qauth.shortcuts"
+        ));
+
+        toggleCont = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.qauth.togglecont",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_DOWN,
                 "category.qauth.shortcuts"
         ));
     }
@@ -232,7 +292,7 @@ public class MainClient implements ClientModInitializer {
 
                 if (!stack.isEmpty()) {
                     ArrayList<Pair<Integer, Integer>> list = cont.getOrDefault(stack.getItem(), new ArrayList<>());
-                    list.add(new Pair<>(slot.x, slot.y));
+                    list.add(Pair.of(slot.x, slot.y));
                     cont.put(stack.getItem(), list);
                 }
 
@@ -251,7 +311,7 @@ public class MainClient implements ClientModInitializer {
                         if (is.getItem().equals(stack.getItem()) && !is.isEmpty()) {
                             if (!npcs.contains(handledScreen.getTitle().getString()) || i < handledScreen.getScreenHandler().slots.size() - (18 + 36)) { // ignore NPCs shops
                                 containsStashable = true;
-                                stashable.add(new Pair<>(slot.x, slot.y));
+                                stashable.add(Pair.of(slot.x, slot.y));
                             }
                         }
                     }
@@ -263,12 +323,12 @@ public class MainClient implements ClientModInitializer {
                 Slot slot = handledScreen.getScreenHandler().slots.get(i);
                 ItemStack stack = slot.getStack();
                 if (stack.getCount() == stack.getMaxCount()) {
-                    full.add(new Pair<>(slot.x, slot.y));
+                    full.add(Pair.of(slot.x, slot.y));
                     //cont.remove(stack.getItem());
                     continue;
                 }
                 if (cont.containsKey(stack.getItem())) {
-                    same.add(new Pair<>(slot.x, slot.y));
+                    same.add(Pair.of(slot.x, slot.y));
                     same.addAll(cont.get(stack.getItem()));
                     cont.remove(stack.getItem());
                 }
@@ -298,7 +358,7 @@ public class MainClient implements ClientModInitializer {
         Text selectedQG = Text.literal("");
 
         if (qgIndex >= 0 && qgIndex < keys.length) {
-            selectedQG = (Text) keys[qgIndex];
+            selectedQG = Text.literal((String) keys[qgIndex]);
         }
 
         return selectedQG;
@@ -311,7 +371,7 @@ public class MainClient implements ClientModInitializer {
             return selectedQ;
         }
 
-        Object[] keys = quests.get(selectedQG).entrySet().toArray();
+        Object[] keys = quests.get(selectedQG.getString()).entrySet().toArray();
 
         if (qIndex >= 0 && qIndex < keys.length) {
             selectedQ = (Map.Entry<Text, LoreComponent>) keys[qIndex];
