@@ -36,7 +36,7 @@ public class MainClient implements ClientModInitializer {
     private static KeyBinding qSwitchB;
     private static KeyBinding qgSwitchF;
     private static KeyBinding qgSwitchB;
-    public static HashMap<Text, HashMap<Text, LoreComponent>> quests = new HashMap<>(); // NPC_NAME{QUEST_NAME, QUEST_DESCRIPTION}
+    public static HashMap<String, HashMap<Text, LoreComponent>> quests = new HashMap<>(); // NPC_NAME{QUEST_NAME, QUEST_DESCRIPTION}
     public static int qIndex = 0;
     public static int qgIndex = 0;
 
@@ -165,7 +165,7 @@ public class MainClient implements ClientModInitializer {
 
 
 
-            if (!stash.isEmpty()) {
+            if (!stash.isEmpty() && renderContainers) {
                 int k = 0;
                 context.drawTexture(
                         RenderLayer::getGuiTexturedOverlay,
@@ -249,11 +249,10 @@ public class MainClient implements ClientModInitializer {
                 ) {
                     for (ItemStack is : stash.values()) {
                         if (is.getItem().equals(stack.getItem()) && !is.isEmpty()) {
-                            containsStashable = true;
-                            // ADD A NPC CHECK HERE
-                            // basically just look if npc.contains(handledScreen.getTitle())
-                            // then if so dont count the last two rows (18 slots)
-                            stashable.add(new Pair<>(slot.x, slot.y));
+                            if (!npcs.contains(handledScreen.getTitle().getString()) || i < handledScreen.getScreenHandler().slots.size() - (18 + 36)) { // ignore NPCs shops
+                                containsStashable = true;
+                                stashable.add(new Pair<>(slot.x, slot.y));
+                            }
                         }
                     }
                 }

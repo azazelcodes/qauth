@@ -1,13 +1,10 @@
 package me.azazeldev.qauth.mixin.client;
 
 import me.azazeldev.qauth.client.MainClient;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.component.ComponentMap;
-import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.Item;
@@ -29,8 +26,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import oshi.util.tuples.Pair;
 
 import java.util.HashMap;
-import java.util.Objects;
-import java.util.logging.Logger;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen {
@@ -48,7 +43,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @Unique
     String title = "";
-    boolean needConfirm = false;
+    @Unique
+    boolean sellConfirm = false;
 
     protected HandledScreenMixin(Text title) {
         super(title);
@@ -64,6 +60,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "mouseClicked", at = @At("TAIL"))
     private void onClick(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         MainClient.popSlots();
+        sellConfirm = false;
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
@@ -81,10 +78,10 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         if (
                 keyCode == GLFW.GLFW_KEY_ESCAPE
                 && MainClient.containsStashable
-                && MainClient.npcs.contains(super.getTitle().getString())
+                && MainClient.npcs.contains(title)
         ) {
-            if (!needConfirm) {
-                needConfirm = true;
+            if (!sellConfirm) {
+                sellConfirm = true;
                 cir.setReturnValue(true);
                 cir.cancel();
             }
@@ -124,7 +121,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
                 context.fill(
                         p.getA(), p.getB(),
                         p.getA() + 16, p.getB() + 16,
-                        0xA8FE019A
+                        0xA85D3FD3
                 );
             }
         }
@@ -151,6 +148,6 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
                 quests.put(c.get(DataComponentTypes.CUSTOM_NAME), c.get(DataComponentTypes.LORE));
             }
         }
-        if (containsQuests && !quests.isEmpty()) MainClient.quests.put(super.getTitle(), quests);
+        if (containsQuests && !quests.isEmpty()) MainClient.quests.put(title, quests);
     }
 }
