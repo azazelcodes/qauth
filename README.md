@@ -12,4 +12,42 @@
 
 </div>
 
-! Allergy Warning ! This contains traces of https://github.com/azazelcodes/icomp
+> [!WARNING]  
+> Contains traces of one of my previous mods, [iCompare](https://github.com/azazelcodes/icompare) <br/>
+> Do not use in combination as it will cause conflicts!
+
+> [!NOTE]  
+> qAuth is currently under active development, crashes may happen!! <br/>
+> Just open an issue and tell me about it.
+
+## ✨ Features
+<p>
+  <img src="https://github.com/user-attachments/assets/f728fd2b-5b6b-4bdb-abec-729e72d495e5" width="333" align="left" />
+  <strong>Stash preview!</strong> <br/>
+  Get the contents of your stash from your HUD. <br/>
+  Can easily be hidden with a hotkey!
+</p>
+
+<br/><br/><br/><br/><br/><br/>
+
+<p>
+  <img src="https://github.com/user-attachments/assets/2f1c7963-1759-40d1-8319-54f96e2b034a" width="333" align="right" />
+  <strong>Quest tracker!</strong> <br/>
+  Display accepted quests on your HUD. <br/>
+  Hotkeys can be used to change quest, <br/>
+  change giver, or remove the selected item. <br/>
+  This also tracks upgrades!
+</p>
+
+<br/><br/><br/><br/><br/><br/>
+
+<p>
+  <img src="https://github.com/user-attachments/assets/b8260a0b-6904-4a4a-8153-a607d7c71a0f" width="333" align="left" />
+  <strong>Barrel comparison!</strong> <br/>
+  Overlays colors for items: <br/>
+  - you have in your stash <br/>
+  - you have in your inventory <br/>
+  This also adds a block for selling <br/>
+  items you have in your stash. <br/>
+  You will need to double-tap <strong>ESC</strong>!
+</p>
