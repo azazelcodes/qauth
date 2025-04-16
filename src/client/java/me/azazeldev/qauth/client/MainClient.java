@@ -294,15 +294,6 @@ public class MainClient implements ClientModInitializer {
                 }
             }
 
-            // A
-            context.drawText(
-                    client.textRenderer,
-                    Text.literal("P: " + page + " S?: " + pageSwitched),
-                    8, 64 + i*8,
-                    0xFFFFFFFF, false
-            );
-            // A
-
 
             int k = 0;
             int r = -1;
