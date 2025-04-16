@@ -115,7 +115,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "drawForeground", at = @At("HEAD"))
     private void onDrawSlots(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
         if (MainClient.pageSwitched) {
-            if (hackyPageTrigger == 11) { // assume 20 tps max? ---- IDK WHY 11, I THOUGHT IT WAS 20, NVM
+            if (hackyPageTrigger == 20) { // assume 20 tps max?
                 hackyPageTrigger = 0;
                 MainClient.pageSwitched = false;
             }
