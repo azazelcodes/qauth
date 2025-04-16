@@ -5,8 +5,10 @@
   "key.qauth.qgswitchf" : "Switch Giver Forward",
   "key.qauth.qgswitchb" : "Switch Giver Backward",
   "key.qauth.qrm" : "Remove Selected",
+  "key.qauth.cleark" : "Clear Killtracker",
 
   "category.qauth.shortcuts" : "Shortcuts",
   "key.qauth.dropstack" : "Drop Stack",
-  "key.qauth.togglecont" : "Toggle Stash"
+  "key.qauth.togglecont" : "Toggle Stash",
+  "key.qauth.mark" : "Mark as Valuable"
 }

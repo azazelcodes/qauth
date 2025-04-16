@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -11,13 +12,21 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.component.type.LoreComponent;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -61,11 +70,35 @@ public class MainClient implements ClientModInitializer {
 
 
     private static KeyBinding toggleCont;
+    public static KeyBinding markValuable;
+    public static ArrayList<Text> marked = new ArrayList<>();
+
+    private static final Vec3d spawn = new Vec3d(97.5, 48.0, 5.5);
+    public static boolean atHome = false;
+
+    public static int page = 0;
+    public static boolean pageSwitched = false;
+
+
+    public static HashMap<Integer, Long> attacked = new HashMap<>(); // Entity IDS
+    public static HashMap<EntityType, Integer> kills = new HashMap<>();
+    public static KeyBinding cleark;
 
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             popSlots();
+
+            if (
+                    client.player == null
+                    || client.player.isDead() // Dont actually know why Im doing this if we get pos??
+                    || client.player.getPos().distanceTo(spawn) <= 1.7
+                    //&& !atHome
+            ) {
+                if (!atHome) atHome = true;
+            } else if (atHome) {
+                atHome = false;
+            }
 
 
             Text selectedQG = getSelectedQG();
@@ -110,6 +143,57 @@ public class MainClient implements ClientModInitializer {
             while (toggleCont.wasPressed()) {
                 renderContainers = !renderContainers;
             }
+
+            Iterator<Integer> iterator = attacked.keySet().iterator();
+            while (iterator.hasNext()) {
+                Integer e = iterator.next();
+                if (client.world != null) {
+                    long dist = Instant.now().toEpochMilli() - attacked.get(e);
+                    if (dist > 200) {
+                        iterator.remove();
+                        continue;
+                    }
+                    var entity = client.world.getEntityById(e);
+                    if (entity == null) iterator.remove();
+                    else if (!entity.isAlive()) {
+                        iterator.remove();
+                        kills.put(entity.getType(), kills.getOrDefault(entity.getType(), 0) + 1);
+                    }
+                }
+            }
+
+            while (cleark.wasPressed()) {
+                kills.clear();
+            }
+        });
+
+        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (!world.isClient || hand != Hand.MAIN_HAND || !(player instanceof PlayerEntity) || player != MinecraftClient.getInstance().player) return ActionResult.PASS;
+
+            boolean canSweep = player.isOnGround()
+                                && !player.isSprinting()
+                                && (
+                                        player.isHolding(Items.WOODEN_SWORD)
+                                        || player.isHolding(Items.STONE_SWORD) // JUST AS A PRECAUTION
+                                        || player.isHolding(Items.IRON_SWORD)
+                                        || player.isHolding(Items.DIAMOND_SWORD)
+                                )
+                                && player.getAttackCooldownProgress(1f) >= 1f;
+
+            List<Entity> entities = new ArrayList<>();
+            if (canSweep) { // HERE WE'D HAVE TO CALCULATE THE BOX
+                /*
+                calculate x y and z by rotating a base of x = 1, z = 1, y = 0 with q° of a box with center and x, y, z dimensions
+                 */
+                 entities = world.getOtherEntities(entity, Box.of(entity.getPos(), 2.0, 1.0, 2.0)); // 2? I really dunno
+            }
+            entities.add(entity);
+
+            long now = Instant.now().toEpochMilli();
+            for (Entity e : entities) {
+                if (e.isAlive()) attacked.put(e.getId(), now); // cuz sometimes theres corpses which are hittable and they count as double kill and thats dumb so please keep isAlive here but maybe it messes something up but idrk so please somebody check Im literally doing this all solo wtaf why nobody helpings :(
+            }
+            return ActionResult.PASS;
         });
 
 
@@ -185,7 +269,7 @@ public class MainClient implements ClientModInitializer {
                         HOTBAR_TEXTURE,
                         screenWidth - 16 - 9*22 - 3, 22 - 3,
                         0f, 0f,
-                        9*22, 5*22,
+                        9*22, (stash.size() / 9)*22,
                         22, 22
                 );
 
@@ -218,7 +302,7 @@ public class MainClient implements ClientModInitializer {
             for (Pair<ItemStack, Long> e : crafting.values()) {
                 if (k % 3 == 0) r += 1;
                 int ix = (screenWidth - (k+1)*48) + r*3*48; // basically screen - amount of items but + every third I add the same as I subtract so its the same??
-                int iy = 7 + ((!stash.isEmpty() && renderContainers) ? 128 : 0) + r*(22+16);
+                int iy = 7 + ((!stash.isEmpty() && renderContainers) ? (stash.size() / 9)*22 + 22 : 0) + r*(22+16);
                 context.drawItem(
                         e.getKey(),
                         ix, iy
@@ -251,6 +335,22 @@ public class MainClient implements ClientModInitializer {
 
                 k += 1;
             }
+
+
+            r = 0;
+            for (Map.Entry<EntityType, Integer> kill : kills.entrySet()) {
+                Text amount = Text.literal(" x" + kill.getValue().toString()).formatted(
+                        Formatting.AQUA,
+                        Formatting.BOLD
+                );
+                context.drawText(
+                        client.textRenderer,
+                        Text.literal(kill.getKey().getName().getString()).append(amount),
+                        7, screenHeight - 242 - r*22,
+                        0xFFFFFFFF, true
+                );
+                r += 1;
+            }
         });
 
 
@@ -267,7 +367,23 @@ public class MainClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_DOWN,
                 "category.qauth.shortcuts"
         ));
+
+        markValuable = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.qauth.mark",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_V,
+                "category.qauth.shortcuts"
+        ));
+
+        cleark = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.qauth.cleark",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_KP_9,
+                "category.qauth.quests"
+        ));
     }
+
+
 
     public static void popSlots() {
         full = new ArrayList<>();
@@ -302,8 +418,10 @@ public class MainClient implements ClientModInitializer {
                         && stack.getItem() != Items.RED_STAINED_GLASS_PANE
                         && !stack.getName().getString().contains("Page")
                         && !stack.getName().getString().contains("Upgrade")
+                        && !pageSwitched
                 ) {
-                    stash.put(i, stack);
+                    int offset = (5*9)*page;
+                    stash.put(i + offset, stack);
                 } else if (
                         !handledScreen.getTitle().getString().equals("Stash")
                 ) {

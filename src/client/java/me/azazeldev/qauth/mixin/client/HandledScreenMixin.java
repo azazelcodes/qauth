@@ -49,6 +49,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     String title = "";
     @Unique
     boolean sellConfirm = false;
+    @Unique
+    int hackyPageTrigger = 0;
 
     protected HandledScreenMixin(Text title) {
         super(title);
@@ -56,15 +58,27 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onOpen(CallbackInfo ci) {
-        MainClient.popSlots();
         title = super.getTitle().getString();
         MainClient.containers.remove(title);
+        //MainClient.popSlots();
     }
 
-    @Inject(method = "mouseClicked", at = @At("TAIL"))
-    private void onClick(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-        MainClient.popSlots();
-        sellConfirm = false;
+    @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;Lnet/minecraft/screen/slot/SlotActionType;)V", at = @At("TAIL"))
+    private void onClick(Slot slot, SlotActionType actionType, CallbackInfo ci) {
+        if (slot != null && slot.hasStack() && !slot.getStack().isEmpty()) {
+            ItemStack stack = slot.getStack();
+
+            MainClient.popSlots();
+            sellConfirm = false;
+
+            if (stack.getItem().equals(Items.ARROW)) {
+                LoreComponent lore = stack.getComponents().get(DataComponentTypes.LORE);
+                if (lore != null && !lore.lines().isEmpty() && lore.lines().getFirst().getString().contains("Page: ")) {
+                    MainClient.pageSwitched = true;
+                    MainClient.page = Integer.parseInt(lore.lines().getFirst().getString().substring(6));
+                }
+            }
+        }
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
@@ -90,6 +104,54 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
                 cir.cancel();
             }
         }
+
+        if (keyCode == MainClient.markValuable.boundKey.getCode() && focusedSlot != null && focusedSlot.hasStack() && !focusedSlot.getStack().isEmpty()) {
+            Text n = focusedSlot.getStack().getComponents().get(DataComponentTypes.CUSTOM_NAME);
+            if (MainClient.marked.contains(n)) MainClient.marked.remove(n);
+            else MainClient.marked.add(n);
+        }
+    }
+
+    @Inject(method = "drawSlots", at = @At("HEAD"))
+    private void onDrawSlots(DrawContext context, CallbackInfo ci) {
+        if (MainClient.pageSwitched) {
+            if (hackyPageTrigger == 20) { // assume 20 tps max?
+                hackyPageTrigger = 0;
+                MainClient.pageSwitched = false;
+            }
+            else hackyPageTrigger += 1;
+        }
+        for (Pair<Integer, Integer> p : MainClient.same) {
+            context.fill(
+                    p.getKey(), p.getValue(),
+                    p.getKey() + 16, p.getValue() + 16,
+                    0xA800FF00
+            );
+        }
+        /*if (!MainClient.isFull(client.player.getInventory())) { // IS USELESS D:
+            for (Pair<Integer, Integer> p : MainClient.unowned) {
+                context.fill(
+                    p.getKey(), p.getValue(),
+                    p.getKey() + 16, p.getValue() + 16,
+                    0xA80000FF
+                );
+            }
+        }*/
+        for (Pair<Integer, Integer> p : MainClient.full) {
+            context.fill(
+                    p.getKey(), p.getValue(),
+                    p.getKey() + 16, p.getValue() + 16,
+                    0xA8FF0000
+            );
+        }
+
+        for (Pair<Integer, Integer> p : MainClient.stashable) {
+            context.fill(
+                    p.getKey(), p.getValue(),
+                    p.getKey() + 16, p.getValue() + 16,
+                    0xA8D2BD96 // 5D3FD3
+            );
+        }
     }
 
     @Inject(method = "drawSlot", at = @At("HEAD"))
@@ -97,35 +159,16 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         if (slot != null) {
             //context.drawText(client.textRenderer, String.valueOf(slot.getIndex()), slot.x, slot.y, 0xFFFFFFFF, false);
 
-            for (Pair<Integer, Integer> p : MainClient.same) {
+            if (
+                    slot.hasStack()
+                    && !slot.getStack().isEmpty()
+                    && slot.getStack().getComponents().get(DataComponentTypes.CUSTOM_NAME) != null
+                    && MainClient.marked.contains(slot.getStack().getComponents().get(DataComponentTypes.CUSTOM_NAME))
+            ) {
                 context.fill(
-                        p.getKey(), p.getValue(),
-                        p.getKey() + 16, p.getValue() + 16,
-                        0xA800FF00
-                );
-            }
-            /*if (!MainClient.isFull(client.player.getInventory())) { // IS USELESS D:
-                for (Pair<Integer, Integer> p : MainClient.unowned) {
-                    context.fill(
-                            p.getKey(), p.getValue(),
-                            p.getKey() + 16, p.getValue() + 16,
-                            0xA80000FF
-                    );
-                }
-            }*/
-            for (Pair<Integer, Integer> p : MainClient.full) {
-                context.fill(
-                        p.getKey(), p.getValue(),
-                        p.getKey() + 16, p.getValue() + 16,
-                        0xA8FF0000
-                );
-            }
-
-            for (Pair<Integer, Integer> p : MainClient.stashable) {
-                context.fill(
-                        p.getKey(), p.getValue(),
-                        p.getKey() + 16, p.getValue() + 16,
-                        0xA85D3FD3
+                        slot.x, slot.y,
+                        slot.x + 16, slot.y + 16,
+                        0xA80000FF // repurposed haha
                 );
             }
         }
@@ -133,6 +176,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @Inject(method = "close", at = @At("TAIL"))
     private void onClose(CallbackInfo ci) {
+        MainClient.page = 0;
+
         boolean containsQuests = false;
         HashMap<Text, LoreComponent> quests = new HashMap<>();
         for (ItemStack s : handler.getStacks()) {
