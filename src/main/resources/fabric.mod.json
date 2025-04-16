@@ -10,6 +10,9 @@
   "icon": "assets/qauth/icon.png",
   "environment": "client",
   "entrypoints": {
+    "fabric-datagen": [
+      "me.azazeldev.qauth.client.MainDataGenerator"
+    ],
     "client": [
       "me.azazeldev.qauth.client.MainClient"
     ],

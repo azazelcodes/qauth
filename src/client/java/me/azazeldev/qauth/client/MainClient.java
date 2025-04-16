@@ -9,7 +9,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.Entity;
@@ -91,9 +90,9 @@ public class MainClient implements ClientModInitializer {
 
             if (
                     client.player == null
-                    || client.player.isDead() // Dont actually know why Im doing this if we get pos??
-                    || client.player.getPos().distanceTo(spawn) <= 1.7
-                    //&& !atHome
+                            || client.player.isDead() // Dont actually know why Im doing this if we get pos??
+                            || client.player.getPos().distanceTo(spawn) <= 1.7
+                //&& !atHome
             ) {
                 if (!atHome) atHome = true;
             } else if (atHome) {
@@ -171,21 +170,21 @@ public class MainClient implements ClientModInitializer {
             if (!world.isClient || hand != Hand.MAIN_HAND || !(player instanceof PlayerEntity) || player != MinecraftClient.getInstance().player) return ActionResult.PASS;
 
             boolean canSweep = player.isOnGround()
-                                && !player.isSprinting()
-                                && (
-                                        player.isHolding(Items.WOODEN_SWORD)
-                                        || player.isHolding(Items.STONE_SWORD) // JUST AS A PRECAUTION
-                                        || player.isHolding(Items.IRON_SWORD)
-                                        || player.isHolding(Items.DIAMOND_SWORD)
-                                )
-                                && player.getAttackCooldownProgress(1f) >= 1f;
+                    && !player.isSprinting()
+                    && (
+                    player.isHolding(Items.WOODEN_SWORD)
+                            || player.isHolding(Items.STONE_SWORD) // JUST AS A PRECAUTION
+                            || player.isHolding(Items.IRON_SWORD)
+                            || player.isHolding(Items.DIAMOND_SWORD)
+            )
+                    && player.getAttackCooldownProgress(1f) >= 1f;
 
             List<Entity> entities = new ArrayList<>();
             if (canSweep) { // HERE WE'D HAVE TO CALCULATE THE BOX
                 /*
                 calculate x y and z by rotating a base of x = 1, z = 1, y = 0 with q° of a box with center and x, y, z dimensions
                  */
-                 entities = world.getOtherEntities(entity, Box.of(entity.getPos(), 2.0, 1.0, 2.0)); // 2? I really dunno
+                entities = world.getOtherEntities(entity, Box.of(entity.getPos(), 2.0, 1.0, 2.0)); // 2? I really dunno
             }
             entities.add(entity);
 
@@ -265,7 +264,6 @@ public class MainClient implements ClientModInitializer {
             if (!stash.isEmpty() && renderContainers) {
                 int k = 0;
                 context.drawTexture(
-                        RenderLayer::getGuiTexturedOverlay,
                         HOTBAR_TEXTURE,
                         screenWidth - 16 - 9*22 - 3, 22 - 3,
                         0f, 0f,
@@ -295,6 +293,15 @@ public class MainClient implements ClientModInitializer {
                     }
                 }
             }
+
+            // A
+            context.drawText(
+                    client.textRenderer,
+                    Text.literal("P: " + page + " S?: " + pageSwitched),
+                    8, 64 + i*8,
+                    0xFFFFFFFF, false
+            );
+            // A
 
 
             int k = 0;
@@ -415,10 +422,10 @@ public class MainClient implements ClientModInitializer {
                 // STASH
                 if (
                         handledScreen.getTitle().getString().equals("Stash")
-                        && stack.getItem() != Items.RED_STAINED_GLASS_PANE
-                        && !stack.getName().getString().contains("Page")
-                        && !stack.getName().getString().contains("Upgrade")
-                        && !pageSwitched
+                                && stack.getItem() != Items.RED_STAINED_GLASS_PANE
+                                && !stack.getName().getString().contains("Page")
+                                && !stack.getName().getString().contains("Upgrade")
+                                && !pageSwitched
                 ) {
                     int offset = (5*9)*page;
                     stash.put(i + offset, stack);
@@ -427,7 +434,7 @@ public class MainClient implements ClientModInitializer {
                 ) {
                     for (ItemStack is : stash.values()) {
                         if (is.getItem().equals(stack.getItem()) && !is.isEmpty()) {
-                            if (!npcs.contains(handledScreen.getTitle().getString()) || i < handledScreen.getScreenHandler().slots.size() - (18 + 36)) { // ignore NPCs shops
+                            if (!npcs.contains(handledScreen.getTitle().getString()) || i < 18) { // ignore NPCs shops
                                 containsStashable = true;
                                 stashable.add(Pair.of(slot.x, slot.y));
                             }

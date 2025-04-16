@@ -14,6 +14,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,7 +24,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -63,8 +63,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         //MainClient.popSlots();
     }
 
-    @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;Lnet/minecraft/screen/slot/SlotActionType;)V", at = @At("TAIL"))
-    private void onClick(Slot slot, SlotActionType actionType, CallbackInfo ci) {
+    @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"))
+    private void onClick(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
         if (slot != null && slot.hasStack() && !slot.getStack().isEmpty()) {
             ItemStack stack = slot.getStack();
 
@@ -112,10 +112,10 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         }
     }
 
-    @Inject(method = "drawSlots", at = @At("HEAD"))
-    private void onDrawSlots(DrawContext context, CallbackInfo ci) {
+    @Inject(method = "drawForeground", at = @At("HEAD"))
+    private void onDrawSlots(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
         if (MainClient.pageSwitched) {
-            if (hackyPageTrigger == 20) { // assume 20 tps max?
+            if (hackyPageTrigger == 11) { // assume 20 tps max? ---- IDK WHY 11, I THOUGHT IT WAS 20, NVM
                 hackyPageTrigger = 0;
                 MainClient.pageSwitched = false;
             }
