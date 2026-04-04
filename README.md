@@ -13,8 +13,8 @@
 </div>
 
 > [!WARNING]  
-> Contains traces of one of my previous mods, [iCompare](https://github.com/azazelcodes/icompare) <br/>
-> Do not use in combination as it will cause conflicts!
+> Newauth updated to 1.21.4+, so a complete rewrite is needed.
+> I currently can't test anything on the server because of versioning, DEVELOPMENT ON HOLD!
 
 > [!NOTE]  
 > qAuth is currently under active development, crashes may happen!! <br/>
@@ -26,6 +26,7 @@
   <strong>Stash preview!</strong> <br/>
   Get the contents of your stash from your HUD. <br/>
   Can easily be hidden with a hotkey!
+  <bold>BROKEN</bold>
 </p>
 
 <br/><br/><br/><br/><br/><br/>
@@ -37,6 +38,7 @@
   Hotkeys can be used to change quest, <br/>
   change giver, or remove the selected item. <br/>
   This also tracks upgrades!
+  <bold>UNIMPLEMENTED</bold>
 </p>
 
 <br/><br/><br/><br/><br/><br/>
