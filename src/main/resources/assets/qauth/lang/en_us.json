@@ -1,14 +1,13 @@
 {
-  "category.qauth.quests" : "Quests",
-  "key.qauth.qswitchf" : "Switch Quest Forward",
-  "key.qauth.qswitchb" : "Switch Quest Backward",
-  "key.qauth.qgswitchf" : "Switch Giver Forward",
-  "key.qauth.qgswitchb" : "Switch Giver Backward",
-  "key.qauth.qrm" : "Remove Selected",
-  "key.qauth.cleark" : "Clear Killtracker",
+  "key.qauth.mark_valuable": "Mark hovered as valuable",
+  "qauth.midnightconfig.title": "qauth config",
+    "qauth.midnightconfig.team": "Teams",
+    "qauth.midnightconfig.teamtut": "Click on the number to change person, write in the empty field to add a new teammate!",
+    "qauth.midnightconfig.tm8s": "Teaming with... ",
 
-  "category.qauth.shortcuts" : "Shortcuts",
-  "key.qauth.dropstack" : "Drop Stack",
-  "key.qauth.togglecont" : "Toggle Stash",
-  "key.qauth.mark" : "Mark as Valuable"
+    "qauth.midnightconfig.ui": "UI",
+    "qauth.midnightconfig.renderStash": "Render a stash HUD",
+    "qauth.midnightconfig.alignStashRight": "Align stash HUD right",
+    "qauth.midnightconfig.stash": "",
+    "qauth.midnightconfig.valuables": "",
 }

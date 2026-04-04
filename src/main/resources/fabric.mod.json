@@ -28,9 +28,8 @@
     }
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}"
-  },
-  "accessWidener": "qauth.accessWidener"
+    "fabricloader": ">=0.18.5",
+    "fabric-api": "*",
+    "minecraft": "~26.1"
+  }
 }
