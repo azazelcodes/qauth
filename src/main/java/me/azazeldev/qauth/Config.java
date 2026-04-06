@@ -8,6 +8,7 @@ import net.minecraft.world.item.Items;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Config extends MidnightConfig { // TODO: move teammates to custom config looping over entries and displaying all of them, if possible do this in the midnightlib window
     public static final String TEAM = "team";
@@ -21,8 +22,12 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
     public static final String UI = "ui";
     @Entry(category = UI) public static boolean renderStash = true;
     @Entry(category = UI) public static boolean alignStashRight = false;
-    @Entry(category = UI) public static List<ItemStack> stash = Lists.newArrayList(); // FIXME: might get away with just ItemStack storing the amount in the stacksize if >64 possible
+    @Entry(category = UI) public static Map<Integer, ItemStack> stash = new HashMap<>(); // FIXME: if possible, move to list, ContainerMixins Config.write is slow though, so the render thread causes an ioob
     @Entry(category = UI) public static List<Item> valuables = Lists.newArrayList(Items.TWISTING_VINES, Items.PRISMARINE_SHARD, Items.BLAZE_ROD, Items.BREEZE_ROD);
+
+    @Entry(category = UI) public static boolean markBarrels = true;
+    // TODO: add color config for markers
+
 
     @Entry(category = UI) public static float slotSize = 1;
     @Entry(category = UI) public static boolean dev = false;

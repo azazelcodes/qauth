@@ -73,7 +73,7 @@ public class CommandHandler {
 
 
     private static boolean test(String cmd) {
-        Config.stash.add(new ItemStack(Item.byId(Integer.parseInt(cmd.split(" ")[1])), Integer.parseInt(cmd.split(" ")[2])));
+        //Config.stash.add(new ItemStack(Item.byId(Integer.parseInt(cmd.split(" ")[1])), Integer.parseInt(cmd.split(" ")[2])));
         return true;
     }
 
