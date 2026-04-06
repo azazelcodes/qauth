@@ -13,8 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(AvatarRenderer.class)
 public class PlayerRendererMixin<AvatarlikeEntity extends Avatar & ClientAvatarEntity> {
     @Inject(method = "shouldShowName", at = @At("RETURN"), cancellable = true)
-    private void overrideName(final AvatarlikeEntity entity, final double distanceToCameraSq, CallbackInfoReturnable<Boolean> ci) { ci.setReturnValue(true); }
+    private void overrideName(final AvatarlikeEntity entity, final double distanceToCameraSq, CallbackInfoReturnable<Boolean> ci) { ci.setReturnValue(true); } // FIXME: this might be a little cheaty, gotta ask goat
 
     @Inject(method = "isPlayerUpsideDown(Lnet/minecraft/world/entity/player/Player;)Z", at = @At("RETURN"), cancellable = true)
-    private static void overrideFlip(final Player player, CallbackInfoReturnable<Boolean> ci) { if (Config.flipTeam && Config.tm8s.contains(player.getGameProfile().name().toLowerCase())) ci.setReturnValue(true); } // maybe move to player.getName().toString() ?
+    private static void overrideFlip(final Player player, CallbackInfoReturnable<Boolean> ci) { String n = player.getGameProfile().name().toLowerCase(); if ((Config.flipTeam && Config.tm8s.contains(n)) || (Config.flipWars && Config.wars.contains(n))) ci.setReturnValue(true); } // maybe move to player.getName().toString() ?
 }

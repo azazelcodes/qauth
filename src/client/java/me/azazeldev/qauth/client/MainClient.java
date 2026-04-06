@@ -1,14 +1,12 @@
 package me.azazeldev.qauth.client;
 
-import com.google.common.base.CharMatcher;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
-import eu.midnightdust.lib.config.MidnightConfig;
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.Main;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.ChatFormatting;
@@ -16,18 +14,12 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUtils;
-import net.minecraft.world.item.Items;
 import org.lwjgl.glfw.GLFW;
-import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
-
-import java.util.Map;
 
 public class MainClient implements ClientModInitializer {
     private static final Identifier HOTBAR_TEXTURE = Identifier.fromNamespaceAndPath("qauth", "textures/gui/hotbar_texture.png");
@@ -39,7 +31,7 @@ public class MainClient implements ClientModInitializer {
         KeyMapping.Category MAIN_CATEGORY = KeyMapping.Category.register(
                 Identifier.fromNamespaceAndPath(Main.MOD_ID, "qauth")
         );
-        markValuable = KeyMappingHelper.registerKeyMapping(
+        markValuable = KeyBindingHelper.registerKeyBinding(
                 new KeyMapping(
                         "key.qauth.mark_valuable",
                         InputConstants.Type.KEYSYM,
@@ -56,7 +48,7 @@ public class MainClient implements ClientModInitializer {
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "stash_preview"), MainClient::StashPreview); // FIXME: draw above all screens, even containers - how? idk
     }
 
-    private static void StashPreview(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+    private static void StashPreview(GuiGraphics graphics, DeltaTracker delta) {
         if (!Config.renderStash) return;
         int slotSize = (int) (0.75f*24);
         Window window = Minecraft.getInstance().getWindow();
@@ -77,20 +69,20 @@ public class MainClient implements ClientModInitializer {
             int iy = 2 + (int) Math.floor((double)i/9)*slotSize;
             graphics.pose().pushMatrix();
             graphics.pose().scale(Config.slotSize);
-            graphics.item(
+            graphics.renderItem(
                     it,
                     ix, iy
             );
             i++;
-            if (it.count() <= 1) { graphics.pose().popMatrix(); continue; }
+            if (it.getCount() <= 1) { graphics.pose().popMatrix(); continue; }
             Font font = Minecraft.getInstance().font;
-            graphics.text(font, String.valueOf(it.count()), ix+slotSize-font.width(String.valueOf(it.count()))-1, iy+slotSize-font.lineHeight-1, 0xFFA9A9A9);
+            graphics.textRenderer().accept(ix+slotSize-font.width(String.valueOf(it.getCount()))-1, iy+slotSize-font.lineHeight-1, Component.literal(String.valueOf(it.getCount())).withColor(0xFFA9A9A9));
             graphics.pose().popMatrix();
         }
     }
 
 
     public static void sendClient(Component msg) {
-        Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("qa>>").withStyle(ChatFormatting.ITALIC).withColor(0xC889CFF0).append(Component.literal(" ").withStyle(ChatFormatting.RESET).append(msg))); // TODO: move to minimessage
+        Minecraft.getInstance().gui.getChat().addMessage(Component.literal("qa>>").withStyle(ChatFormatting.ITALIC).withColor(0xC889CFF0).append(Component.literal(" ").withStyle(ChatFormatting.RESET).append(msg))); // TODO: move to minimessage
     }
 }

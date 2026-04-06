@@ -14,7 +14,8 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
     @Comment(category = TEAM) public static Comment teamtut;
     @Entry(category = TEAM) public static List<String> tm8s = Lists.newArrayList("azazeldev");
     @Entry(category = TEAM) public static List<String> wars = Lists.newArrayList(); // TODO: when moving to custom renderer, move to HashMap<Player,Tag> to allow for custom tagging like "allies"
-    @Entry(category = TEAM) public static boolean flipTeam = true;
+    @Entry(category = TEAM) public static boolean flipTeam = false;
+    @Entry(category = TEAM) public static boolean flipWars = true;
 
 
     public static final String UI = "ui";

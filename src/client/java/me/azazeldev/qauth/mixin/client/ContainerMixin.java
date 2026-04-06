@@ -1,9 +1,8 @@
 package me.azazeldev.qauth.mixin.client;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.client.MainClient;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
@@ -12,11 +11,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -30,8 +27,8 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
     protected T menu;
 
 
-    @Inject(method = "<init>(Lnet/minecraft/world/inventory/AbstractContainerMenu;Lnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/network/chat/Component;II)V", at = @At("RETURN"))
-    private void constructed(final T menu, final Inventory inventory, final Component title, final int imageWidth, final int imageHeight, CallbackInfo ci) {
+    @Inject(method = "<init>(Lnet/minecraft/world/inventory/AbstractContainerMenu;Lnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/network/chat/Component;)V", at = @At("RETURN"))
+    private void constructed(final T menu, final Inventory inventory, final Component title, CallbackInfo ci) {
         System.out.println("Constructor!");
         //System.out.println(menu.getType().toString());
     }
@@ -42,12 +39,12 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
         //System.out.println(menu.getType().toString());
     }
 
-    @Inject(method = "extractSlot(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/world/inventory/Slot;II)V", at = @At(
+    @Inject(method = "renderSlot(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/inventory/Slot;II)V", at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;item(Lnet/minecraft/world/item/ItemStack;III)V",
+            target = "Lnet/minecraft/client/gui/GuiGraphics;renderItem(Lnet/minecraft/world/item/ItemStack;III)V",
             shift = At.Shift.BEFORE
     ))
-    public void beforeRenderItem(final GuiGraphicsExtractor graphics, final Slot slot, final int mouseX, final int mouseY, CallbackInfo ci) {
+    public void beforeRenderItem(final GuiGraphics graphics, final Slot slot, final int mouseX, final int mouseY, CallbackInfo ci) {
         if (slot.getItem().isEmpty()) return;
         if(slot.index >= menu.slots.size()-9*4) return;
         int col = 0x00FFFFFF;

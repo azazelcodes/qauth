@@ -2,19 +2,17 @@ package me.azazeldev.qauth.client;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import me.azazeldev.qauth.Config;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
@@ -36,7 +34,7 @@ public class CommandHandler {
     }
     public static void registerBrigadier(CommandDispatcher<FabricClientCommandSource> dispatcher) { // FIXME: three different warnings, fix plz
         for (Map.Entry<String, List<Pair<String, ArgumentType>>> e :  cmds.entrySet()) {
-            ArgumentBuilder<FabricClientCommandSource, LiteralArgumentBuilder<FabricClientCommandSource>> pass0 = ClientCommands.literal(e.getKey());
+            ArgumentBuilder<FabricClientCommandSource, LiteralArgumentBuilder<FabricClientCommandSource>> pass0 = ClientCommandManager.literal(e.getKey());
             ArgumentBuilder lpass = null;
             int i = 0;
             for (Pair<String, ArgumentType> a : e.getValue()) {
@@ -82,7 +80,7 @@ public class CommandHandler {
 
     private static boolean addList(List<String> target, String item, String identifier) {
         boolean ran = false;
-        for (String n : item.split(" ")) if (!n.startsWith("!")) if (Config.toggleItem(target, n))
+        for (String n : item.split(" ")) if (!n.startsWith("!")) if (Config.toggleItem(target, n.toLowerCase()))
             { MainClient.sendClient(Component.literal("Added " + n + " to your " + identifier + "!").withColor(0xFF00FF00)); ran=true; }
             else { MainClient.sendClient(Component.literal("Removed " + n + " from your " + identifier + "!").withColor(0xFFFF0000)); ran=true; }
         return ran;
