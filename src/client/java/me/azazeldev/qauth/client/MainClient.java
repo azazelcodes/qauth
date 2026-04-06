@@ -1,5 +1,7 @@
 package me.azazeldev.qauth.client;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import me.azazeldev.qauth.Config;
@@ -18,18 +20,31 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class MainClient implements ClientModInitializer {
     private static final Identifier HOTBAR_TEXTURE = Identifier.fromNamespaceAndPath("qauth", "textures/gui/hotbar_texture.png");
 
     public static KeyMapping markValuable;
-    public static String[] nostash = { "[ ]", "[Upgrade]" };
+
+    public static String[] nostash = {" ", "Upgrade"};
+
+    public static Item[] questi = {Items.ORANGE_STAINED_GLASS_PANE, Items.RED_STAINED_GLASS_PANE};
+    public static Map<String, JsonObject> questIndices = new HashMap<>(); // <NPC, Indices> // FIXME: ugly
+    public static Map<String, JsonObject> quests = new HashMap<>(); // <NPC, Quest>
 
     @Override
     public void onInitializeClient() {
@@ -46,9 +61,7 @@ public class MainClient implements ClientModInitializer {
         );
 
         CommandHandler.popCmds();
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            CommandHandler.registerBrigadier(dispatcher);
-        });
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandHandler.registerBrigadier(dispatcher));
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "stash_preview"), MainClient::StashPreview); // FIXME: draw above all screens, even containers - how? idk
     }
@@ -56,23 +69,23 @@ public class MainClient implements ClientModInitializer {
     private static void StashPreview(GuiGraphics graphics, DeltaTracker delta) {
         if (!Config.renderStash) return;
         List<Map.Entry<Integer, ItemStack>> stash = Config.stash.entrySet().stream().filter(e -> !e.getValue().isEmpty()).toList();
-        int slotSize = (int) (0.75f*24);
+        int slotSize = (int) (0.75f * 24);
         Window window = Minecraft.getInstance().getWindow();
 
         graphics.pose().pushMatrix();
-        graphics.pose().scale(Config.slotSize*0.75f);
+        graphics.pose().scale(Config.slotSize * 0.75f);
         graphics.blit(RenderPipelines.GUI_TEXTURED, HOTBAR_TEXTURE,
-                (int)(Config.alignStashRight ? window.getGuiScaledWidth()*(1/0.75f)/Config.slotSize - 9*24 - 2 : 2),2,
-                    0,0,
-                    9*24,(int) Math.ceil((double)stash.size()/9)*24,
-                24,24
+                (int) (Config.alignStashRight ? window.getGuiScaledWidth() * (1 / 0.75f) / Config.slotSize - 9 * 24 - 2 : 2), 2,
+                0, 0,
+                9 * 24, (int) Math.ceil((double) stash.size() / 9) * 24,
+                24, 24
         );
         graphics.pose().popMatrix();
 
         int i = 0;
         for (Map.Entry<Integer, ItemStack> e : stash) { // FIXME: CENTER THESE BETTER!! fwiquin hud changes. 1.21 was so much better </3
-            int ix = (int)(Config.alignStashRight ? window.getGuiScaledWidth()/Config.slotSize - 9*slotSize - 2 + (i % 9)*slotSize : 2 + (i % 9)*slotSize);
-            int iy = 2 + (int) Math.floor((double)i/9)*slotSize;
+            int ix = (int) (Config.alignStashRight ? window.getGuiScaledWidth() / Config.slotSize - 9 * slotSize - 2 + (i % 9) * slotSize : 2 + (i % 9) * slotSize);
+            int iy = 2 + (int) Math.floor((double) i / 9) * slotSize;
             graphics.pose().pushMatrix();
             graphics.pose().scale(Config.slotSize);
             graphics.renderItem(
@@ -80,9 +93,12 @@ public class MainClient implements ClientModInitializer {
                     ix, iy
             );
             i++;
-            if (e.getValue().getCount() <= 1) { graphics.pose().popMatrix(); continue; }
+            if (e.getValue().getCount() <= 1) {
+                graphics.pose().popMatrix();
+                continue;
+            }
             Font font = Minecraft.getInstance().font;
-            graphics.textRenderer().accept(ix+slotSize-font.width(String.valueOf(e.getValue().getCount()))-1, iy+slotSize-font.lineHeight-1, Component.literal(String.valueOf(e.getValue().getCount())).withColor(0xFFA9A9A9));
+            graphics.textRenderer().accept(ix + slotSize - font.width(String.valueOf(e.getValue().getCount())) - 1, iy + slotSize - font.lineHeight - 1, Component.literal(String.valueOf(e.getValue().getCount())).withColor(0xFFA9A9A9));
             graphics.pose().popMatrix();
         }
     }
@@ -90,5 +106,50 @@ public class MainClient implements ClientModInitializer {
 
     public static void sendClient(Component msg) {
         Minecraft.getInstance().gui.getChat().addMessage(Component.literal("qa>>").withStyle(ChatFormatting.ITALIC).withColor(0xC889CFF0).append(Component.literal(" ").withStyle(ChatFormatting.RESET).append(msg))); // TODO: move to minimessage
+    }
+
+    public static JsonObject fetchAPI(String path) { // FIXME: faster plz
+        /* old way of downloading quest index, this stores the filename as the sha1
+        HttpUtil.DownloadProgressListener listener = new HttpUtil.DownloadProgressListener() {
+            @Override
+            public void requestStart() {}
+
+            @Override
+            public void downloadStart(OptionalLong size) {}
+
+            @Override
+            public void downloadedBytes(long l) {}
+
+            @Override
+            public void requestFinished(boolean success) {
+                System.out.println("Done: " + success);
+            }
+        };
+        try {
+            HttpUtil.downloadFile(
+                    FabricLoader.getInstance().getConfigDir().resolve("qa"),
+                    URI.create("https://raw.githubusercontent.com/azazelcodes/uaapi/refs/heads/master/quests/therapist.index.json").toURL(),
+                    new HashMap<>(),
+                    Hashing.sha1(),
+                    null,
+                    64 * 1024 * 1024, // 64mb?
+                    Proxy.NO_PROXY,
+                    listener
+            );
+        } catch (MalformedURLException e) {
+            System.out.println("Malformed URL :(");
+        }
+        */
+        try {
+            URL url = URI.create(
+                    "https://raw.githubusercontent.com/azazelcodes/uaapi/master/" + path + ".json" // FIXME: String.format
+            ).toURL();
+            try (Reader reader = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
+                return JsonParser.parseReader(reader).getAsJsonObject();
+            }
+        } catch(IOException e) {
+            // FIXME: catch
+        }
+        return null;
     }
 }

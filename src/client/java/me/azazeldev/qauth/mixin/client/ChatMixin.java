@@ -2,11 +2,8 @@ package me.azazeldev.qauth.mixin.client;
 
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.client.CommandHandler;
-import me.azazeldev.qauth.client.MainClient;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

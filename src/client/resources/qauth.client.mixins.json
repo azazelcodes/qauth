@@ -17,6 +17,7 @@
     "ChatMixin",
     "ContainerMixin",
     "EntityMixin",
-    "PlayerRendererMixin"
+    "PlayerRendererMixin",
+    "TabMixin"
   ]
 }

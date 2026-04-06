@@ -2,6 +2,8 @@ package me.azazeldev.qauth;
 
 import com.google.common.collect.Lists;
 import eu.midnightdust.lib.config.MidnightConfig;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -13,10 +15,10 @@ import java.util.Map;
 public class Config extends MidnightConfig { // TODO: move teammates to custom config looping over entries and displaying all of them, if possible do this in the midnightlib window
     public static final String TEAM = "team";
     @Comment(category = TEAM) public static Comment teamtut;
-    @Entry(category = TEAM) public static List<String> tm8s = Lists.newArrayList("azazeldev");
-    @Entry(category = TEAM) public static List<String> wars = Lists.newArrayList(); // TODO: when moving to custom renderer, move to HashMap<Player,Tag> to allow for custom tagging like "allies"
-    @Entry(category = TEAM) public static boolean flipTeam = false;
-    @Entry(category = TEAM) public static boolean flipWars = true;
+    @Entry(category = TEAM) public static Map<String, Integer> tags = new HashMap<>(); // <Tag, Color> // FIXME: ugly, move to better structure
+    @Entry(category = TEAM) public static Map<String, String> relations = new HashMap<>(); // <Username, Tag> // how does this render? // TODO: move to custom renderer
+    @Entry(category = TEAM) public static List<String> noattack = Lists.newArrayList("team");
+    @Entry(category = TEAM) public static List<String> flip = Lists.newArrayList("team");
 
 
     public static final String UI = "ui";
@@ -42,5 +44,16 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
         if (c) list.remove(target); else list.add(target);
         Config.write(Main.MOD_ID);
         return !c;
+    }
+
+    public static Component getRel(String name) {
+        Component n = Component.empty();
+        String relation = Config.relations.get(name);
+        if (relation != null) {
+            n = Component.literal("["+relation+"]")
+                    .withStyle(ChatFormatting.BOLD)
+                    .withColor(Config.tags.get(relation));
+        }
+        return n;
     }
 }

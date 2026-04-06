@@ -15,6 +15,7 @@ public class PlayerAttackMixin { // TODO: move this to attackmixin in attack
     @Inject(method = "attack(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
     public void attack(final Player player, final Entity entity, CallbackInfo ci) {
         if(entity.getType() != EntityType.PLAYER) return;
-        if(Config.tm8s.contains(entity.getName().getString().toLowerCase())) ci.cancel();
+        String n = entity.getName().getString().toLowerCase();
+        if(Config.relations.containsKey(n) && Config.noattack.contains(Config.relations.get(n))) ci.cancel();
     }
 }

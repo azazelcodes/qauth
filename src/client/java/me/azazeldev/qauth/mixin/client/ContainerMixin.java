@@ -1,9 +1,10 @@
 package me.azazeldev.qauth.mixin.client;
 
-import com.llamalad7.mixinextras.sugar.Local;
+import com.google.gson.JsonElement;
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.Main;
 import me.azazeldev.qauth.client.MainClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -37,8 +38,15 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
 
     @Shadow public abstract T getMenu();
 
+    // TODO: maybe better management with state enum?
     @Unique
-    boolean stash = false;
+    boolean stashS = false;
+    @Unique
+    boolean questS = false;
+    @Unique
+    boolean shopS = false;
+    @Unique
+    String npc = "";
     @Unique
     int page = 0;
 
@@ -48,9 +56,21 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
     @Inject(method = "<init>(Lnet/minecraft/world/inventory/AbstractContainerMenu;Lnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/network/chat/Component;)V", at = @At("RETURN"))
     private void constructed(final T menu, final Inventory inventory, final Component title, CallbackInfo ci) {
         System.out.println("Constructor!");
-        if (title.getString().toLowerCase().contains("stash")) stash = true;
-        if (stash) page = Integer.parseInt(title.getString().toLowerCase().split(" \\| page ")[1])-1;
-        else stashables = Config.stash.values().stream().map(ItemStack::getItem).toList(); // FIXME: inefficient, on every container open repop stashables
+        String t = title.getString().toLowerCase();
+
+
+        stashS = t.contains("stash");
+        if (stashS) page = Integer.parseInt(t.split(" \\| page ")[1])-1;
+        else {
+            stashables = Config.stash.values().stream().map(ItemStack::getItem).toList();
+            Config.write(Main.MOD_ID);
+        } // FIXME: inefficient, on every container open repop stashables
+
+        questS = t.endsWith("quests"); // TODO: test
+        shopS = t.contains("shop");
+        npc = "";
+        if (questS || shopS) npc = t.split(" ")[0];
+        MainClient.questIndices.remove(npc);
     }
     // FIXME: menu.getType crashes on player inventory => way to check if container
     @Inject(method = "init()V", at = @At("HEAD"))
@@ -65,13 +85,32 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
             shift = At.Shift.BEFORE
     ))
     public void beforeRenderItem(final GuiGraphics graphics, final Slot slot, final int mouseX, final int mouseY, CallbackInfo ci) {
-        if (stash && slot.index < 5*9 && !contains(MainClient.nostash, slot.getItem().getDisplayName().getString())) {
+        List<Component> disp = slot.getItem().getDisplayName().toFlatList();
+        // stash tracker
+        if (stashS && slot.index < 5*9 && !contains(MainClient.nostash, disp.get(1).getString())) {
             Config.stash.put(5*9*page+slot.index, slot.getItem()); // FIXME: inefficient, on every render repop stash + write it!! => ioob for regular list
             Config.write(Main.MOD_ID);
             return;
         }
+
         if (slot.getItem().isEmpty()) return;
         if (slot.index >= menu.slots.size()-9*4) return;
+
+        // quest tracker
+        // TODO: maybe move to own function
+        if (questS && slot.index > 9 && slot.index < 19 && contains(MainClient.questi, slot.getItem().getItem())/* && disp.get(2).getString().contains("(Click to ")*/) { // FIXME: commented out check: replacement for item type check, not working atm because kkona messed up mechanic quest names
+            if (!MainClient.questIndices.containsKey(npc)) {
+                MainClient.quests.remove(npc);
+                if (Minecraft.getInstance().getCurrentServer() != null) MainClient.sendClient(Component.literal(Minecraft.getInstance().getCurrentServer().name)); // FIXME: temp, base for unauth check
+
+                MainClient.questIndices.put(npc, MainClient.fetchAPI("quests/"+npc+".index"));
+                JsonElement index = MainClient.questIndices.get(npc).get(disp.get(1).getString());
+                if (index != null) MainClient.quests.put(npc, MainClient.fetchAPI("quests/"+npc+"/"+index.toString()));
+                else MainClient.sendClient(Component.literal("Your current quest was not found on the API!").withColor(0xFFFF0000));
+            }
+        }
+
+        // barrel marking
         if (!Config.markBarrels) return;
         int col = 0x00FFFFFF;
 

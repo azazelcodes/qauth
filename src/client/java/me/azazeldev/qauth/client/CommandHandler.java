@@ -11,13 +11,12 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,12 +35,10 @@ public class CommandHandler {
         for (Map.Entry<String, List<Pair<String, ArgumentType>>> e :  cmds.entrySet()) {
             ArgumentBuilder<FabricClientCommandSource, LiteralArgumentBuilder<FabricClientCommandSource>> pass0 = ClientCommandManager.literal(e.getKey());
             ArgumentBuilder lpass = null;
-            int i = 0;
             for (Pair<String, ArgumentType> a : e.getValue()) {
                 ArgumentBuilder pass = Commands.argument(a.getKey(), a.getValue()).executes(CommandHandler::out);
                 if (lpass!=null) pass = pass.then(lpass);
                 lpass = pass;
-                i++;
             }
             dispatcher.register(pass0.then(lpass));
         }
@@ -54,9 +51,8 @@ public class CommandHandler {
 
     public static boolean execute(String msg) {
         if (!msg.startsWith("!")) return false;
-        Function<String, Boolean> cmd = switch (msg.substring(1).split(" ")[0]) {
-            case "war", "enemy" -> CommandHandler::war;
-            case "team", "friend" -> CommandHandler::team;
+        Function<String, Boolean> cmd = switch (msg.substring(1).toLowerCase().split(" ")[0]) {
+            case "tag", "rel" -> CommandHandler::tag;
 
             case "test" -> CommandHandler::test;
 
@@ -68,8 +64,21 @@ public class CommandHandler {
 
     private static boolean EMPTY(String cmd) { return false; }
 
-    private static boolean team(String cmd) { return addList(Config.tm8s, cmd, "team"); }
-    private static boolean war(String cmd) { return addList(Config.wars, cmd, "wars"); }
+    private static boolean tag(String cmd) {
+        String[] args = cmd.split(" ");
+        if (args.length != 2) { // TODO: move error handling out of this, throw InvalidArguments and handle it in cmd.apply
+            MainClient.sendClient(Component.literal("Invalid Arguments! Usage: !tag <username> <relationship>"));
+            return false;
+        }
+
+        Config.relations.remove(args[0]);
+        if (Config.relations.containsKey(args[0]) && Objects.equals(Config.relations.get(args[0]), args[1])) MainClient.sendClient(Component.literal(String.format("Removed %s from %s!", args[0], args[1])).withColor(0xFFFF0000));
+        else {
+            Config.relations.put(args[0], args[1]);
+            MainClient.sendClient(Component.literal(String.format("Your relation ship with %s is now \"%s\"", args[0], args[1])));
+        }
+        return true;
+    }
 
 
     private static boolean test(String cmd) {
