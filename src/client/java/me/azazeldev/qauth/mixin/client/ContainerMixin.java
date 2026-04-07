@@ -101,9 +101,12 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
         if (questS && slot.index > 9 && slot.index < 19 && contains(MainClient.questi, slot.getItem().getItem())/* && disp.get(2).getString().contains("(Click to ")*/) { // FIXME: commented out check: replacement for item type check, not working atm because kkona messed up mechanic quest names
             if (!MainClient.questIndices.containsKey(npc)) {
                 MainClient.quests.remove(npc);
-                if (Minecraft.getInstance().getCurrentServer() != null) MainClient.sendClient(Component.literal(Minecraft.getInstance().getCurrentServer().name)); // FIXME: temp, base for unauth check
+                if (Minecraft.getInstance().getCurrentServer() != null) MainClient.sendClient(Component.literal(Minecraft.getInstance().getCurrentServer().ip)); // FIXME: temp, base for unauth check
 
                 MainClient.questIndices.put(npc, MainClient.fetchAPI("quests/"+npc+".index"));
+                MainClient.sendClient(Component.literal("quest name: "+disp.get(1).getString()));
+                MainClient.sendClient(Component.literal("size: "+MainClient.questIndices.get(npc).size()));
+                MainClient.sendClient(Component.literal("inside: \""+MainClient.questIndices.get(npc).entrySet().iterator().next().getKey()+"\""));
                 JsonElement index = MainClient.questIndices.get(npc).get(disp.get(1).getString());
                 if (index != null) MainClient.quests.put(npc, MainClient.fetchAPI("quests/"+npc+"/"+index.toString()));
                 else MainClient.sendClient(Component.literal("Your current quest was not found on the API!").withColor(0xFFFF0000));

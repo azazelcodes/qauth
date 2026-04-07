@@ -38,6 +38,8 @@ import java.util.Map;
 public class MainClient implements ClientModInitializer {
     private static final Identifier HOTBAR_TEXTURE = Identifier.fromNamespaceAndPath("qauth", "textures/gui/hotbar_texture.png");
 
+    private static String[] ips = {"unauth.xyz","130.12.33.16"};
+
     public static KeyMapping markValuable;
 
     public static String[] nostash = {" ", "Upgrade"};

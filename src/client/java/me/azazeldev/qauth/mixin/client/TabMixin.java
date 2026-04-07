@@ -15,6 +15,6 @@ public class TabMixin {
     private void getName(final PlayerInfo info, CallbackInfoReturnable<Component> ci) {
         Component n = Config.getRel(info.getProfile().name().toLowerCase());
         if (n.getString().isEmpty()) return;
-        ci.setReturnValue(n.copy().append(ci.getReturnValue()));
+        ci.setReturnValue(n.copy().append(" ").append(ci.getReturnValue()));
     }
 }
