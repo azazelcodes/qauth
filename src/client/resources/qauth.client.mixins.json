@@ -12,11 +12,11 @@
     "requireAnnotations": true
   },
   "mixins": [
-    "PlayerAttackMixin",
     "AttackMixin",
     "ChatMixin",
     "ContainerMixin",
     "EntityMixin",
+    "PlayerAttackMixin",
     "PlayerRendererMixin",
     "TabMixin"
   ]

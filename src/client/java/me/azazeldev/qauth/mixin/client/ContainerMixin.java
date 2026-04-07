@@ -1,20 +1,23 @@
 package me.azazeldev.qauth.mixin.client;
 
-import com.google.gson.JsonElement;
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.Main;
 import me.azazeldev.qauth.client.MainClient;
+import me.azazeldev.qauth.client.QuestTracker;
+import me.azazeldev.qauth.client.StashTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -33,6 +36,7 @@ import static org.apache.commons.lang3.ArrayUtils.contains;
 public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Screen {
     protected ContainerMixin(Component title) { super(title); }
 
+    @Final
     @Shadow
     protected T menu;
 
@@ -42,7 +46,8 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
     @Unique
     boolean stashS = false;
     @Unique
-    boolean questS = false;
+    //boolean questS = false;
+    boolean profileS = false;
     @Unique
     boolean shopS = false;
     @Unique
@@ -66,11 +71,12 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
             Config.write(Main.MOD_ID);
         } // FIXME: inefficient, on every container open repop stashables
 
-        questS = t.endsWith("quests"); // TODO: test
+        //questS = t.endsWith("quests");
+        profileS = t.startsWith("profile") && t.endsWith(Minecraft.getInstance().player.getPlainTextName());
         shopS = t.contains("shop");
         npc = "";
-        if (questS || shopS) npc = t.split(" ")[0];
-        MainClient.questIndices.remove(npc);
+        if (/*questS || */shopS) npc = t.split(" ")[0];
+        QuestTracker.questIndices.remove(npc);
     }
     // FIXME: menu.getType crashes on player inventory => way to check if container
     @Inject(method = "init()V", at = @At("HEAD"))
@@ -87,7 +93,7 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
     public void beforeRenderItem(final GuiGraphics graphics, final Slot slot, final int mouseX, final int mouseY, CallbackInfo ci) {
         List<Component> disp = slot.getItem().getDisplayName().toFlatList();
         // stash tracker
-        if (stashS && slot.index < 5*9 && !contains(MainClient.nostash, disp.get(1).getString())) {
+        if (stashS && slot.index < 5*9 && !contains(StashTracker.nostash, disp.get(1).getString())) {
             Config.stash.put(5*9*page+slot.index, slot.getItem()); // FIXME: inefficient, on every render repop stash + write it!! => ioob for regular list
             Config.write(Main.MOD_ID);
             return;
@@ -97,20 +103,15 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
         if (slot.index >= menu.slots.size()-9*4) return;
 
         // quest tracker
-        // TODO: maybe move to own function
-        if (questS && slot.index > 9 && slot.index < 19 && contains(MainClient.questi, slot.getItem().getItem())/* && disp.get(2).getString().contains("(Click to ")*/) { // FIXME: commented out check: replacement for item type check, not working atm because kkona messed up mechanic quest names
-            if (!MainClient.questIndices.containsKey(npc)) {
-                MainClient.quests.remove(npc);
-                if (Minecraft.getInstance().getCurrentServer() != null) MainClient.sendClient(Component.literal(Minecraft.getInstance().getCurrentServer().ip)); // FIXME: temp, base for unauth check
+        //if (questS && slot.index > 9 && slot.index < 19 && contains(QuestTracker.questi, slot.getItem().getItem())/* && disp.get(2).getString().contains("(Click to ")*/ && !QuestTracker.questIndices.containsKey(npc)) QuestTracker.fetchQuest(npc, disp.get(1).getString().stripTrailing()); // FIXME: commented out check: replacement for item type check, not working atm because kkona messed up mechanic quest names
+        // FIXME: as soon as I added this, katherine added /profile, which also has the players current quest! this can be removed as soon as /profile shows ALL accepted quests, see FIXME below
 
-                MainClient.questIndices.put(npc, MainClient.fetchAPI("quests/"+npc+".index"));
-                MainClient.sendClient(Component.literal("quest name: "+disp.get(1).getString()));
-                MainClient.sendClient(Component.literal("size: "+MainClient.questIndices.get(npc).size()));
-                MainClient.sendClient(Component.literal("inside: \""+MainClient.questIndices.get(npc).entrySet().iterator().next().getKey()+"\""));
-                JsonElement index = MainClient.questIndices.get(npc).get(disp.get(1).getString());
-                if (index != null) MainClient.quests.put(npc, MainClient.fetchAPI("quests/"+npc+"/"+index.toString()));
-                else MainClient.sendClient(Component.literal("Your current quest was not found on the API!").withColor(0xFFFF0000));
-            }
+        // new quest tracker
+        if (profileS && slot.index < 3 && !QuestTracker.questIndices.containsKey(npc)) {
+            List<Component> lore = slot.getItem().get(DataComponents.LORE).lines(); // FIXME: only last accepted quest, karthylynne plez fix -> once added, loop over all lines, if startsWith("Quest: ") add
+            String quest = lore.get(lore.size()-2).toFlatList().get(1).getString();
+            String qnpc = slot.getItem().getDisplayName().toFlatList().get(1).getString().toLowerCase();
+            if (!quest.equals("Not Started")) QuestTracker.fetchQuest(qnpc, quest);
         }
 
         // barrel marking

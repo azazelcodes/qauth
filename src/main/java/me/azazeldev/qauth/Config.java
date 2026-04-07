@@ -1,6 +1,7 @@
 package me.azazeldev.qauth;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
 import eu.midnightdust.lib.config.MidnightConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -17,14 +18,13 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
     @Comment(category = TEAM) public static Comment teamtut;
     @Entry(category = TEAM) public static Map<String, Integer> tags = new HashMap<>(); // <Tag, Color> // FIXME: ugly, move to better structure
     @Entry(category = TEAM) public static Map<String, String> relations = new HashMap<>(); // <Username, Tag> // how does this render? // TODO: move to custom renderer
-    @Entry(category = TEAM) public static List<String> noattack = Lists.newArrayList("team");
+    @Entry(category = TEAM) public static List<String> noattack = Lists.newArrayList("team"); // TODO: move modifiers to a single map
     @Entry(category = TEAM) public static List<String> flip = Lists.newArrayList("team");
 
 
     public static final String UI = "ui";
     @Entry(category = UI) public static boolean renderStash = true;
     @Entry(category = UI) public static boolean alignStashRight = false;
-    @Entry(category = UI) public static Map<Integer, ItemStack> stash = new HashMap<>(); // FIXME: if possible, move to list, ContainerMixins Config.write is slow though, so the render thread causes an ioob
     @Entry(category = UI) public static List<Item> valuables = Lists.newArrayList(Items.TWISTING_VINES, Items.PRISMARINE_SHARD, Items.BLAZE_ROD, Items.BREEZE_ROD);
 
     @Entry(category = UI) public static boolean markBarrels = true;
@@ -37,6 +37,9 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
 
     public static final String UTIL = "util";
     @Entry(category = UTIL) public static boolean keepExtractCmd = false;
+
+    @Entry(category = UTIL) public static Map<Integer, ItemStack> stash = new HashMap<>(); // FIXME: if possible, move to list, ContainerMixins Config.write is slow though, so the render thread causes an ioob
+    @Entry(category = UTIL) public static Map<String, JsonObject> quests = new HashMap<>(); // <NPC, Quest>
 
 
     public static <T> boolean toggleItem(List<T> list, T target) {
