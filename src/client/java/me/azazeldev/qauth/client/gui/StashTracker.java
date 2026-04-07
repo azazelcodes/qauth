@@ -1,4 +1,4 @@
-package me.azazeldev.qauth.client;
+package me.azazeldev.qauth.client.gui;
 
 import com.mojang.blaze3d.platform.Window;
 import me.azazeldev.qauth.Config;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class StashTracker {
     private static final Identifier HOTBAR_TEXTURE = Identifier.fromNamespaceAndPath("qauth", "textures/gui/hotbar_texture.png");
     public static String[] nostash = {" ", "Upgrade"};
-    static void StashPreview(GuiGraphics graphics, DeltaTracker delta) {
+    public static void StashPreview(GuiGraphics graphics, DeltaTracker delta) {
         if (!Config.renderStash) return;
         List<Map.Entry<Integer, ItemStack>> stash = Config.stash.entrySet().stream().filter(e -> !e.getValue().isEmpty()).toList();
         int slotSize = (int) (0.75f * 24);

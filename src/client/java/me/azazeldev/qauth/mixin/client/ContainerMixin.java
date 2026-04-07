@@ -1,10 +1,12 @@
 package me.azazeldev.qauth.mixin.client;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.Main;
 import me.azazeldev.qauth.client.MainClient;
-import me.azazeldev.qauth.client.QuestTracker;
-import me.azazeldev.qauth.client.StashTracker;
+import me.azazeldev.qauth.client.gui.QuestTracker;
+import me.azazeldev.qauth.client.gui.StashTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -14,6 +16,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -24,11 +27,13 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.ArrayUtils.contains;
 
@@ -132,6 +137,12 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
             if (!hover.isEmpty()) Config.toggleItem(Config.valuables, hover.getItem());
             ci.setReturnValue(true);
         }
+    }
+
+    @ModifyVariable(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V", at = @At(value = "HEAD"), ordinal = 1)
+    private int modifyDropped(int modify, Slot slot, int i, int j, ClickType clickType) {
+        if (clickType.equals(ClickType.THROW) && Config.alwaysAllDrop) return 1;
+        return modify;
     }
 
 

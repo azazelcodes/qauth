@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class Config extends MidnightConfig { // TODO: move teammates to custom config looping over entries and displaying all of them, if possible do this in the midnightlib window
     public static final String TEAM = "team";
-    @Comment(category = TEAM) public static Comment teamtut;
+    @Comment(category = TEAM) public static Comment teamtut; // FIXME: maybe MAYBE move to UUID, dont know if its worth the effort of parsing them from username string with the lifetime of this server though
     @Entry(category = TEAM) public static Map<String, Integer> tags = new HashMap<>(); // <Tag, Color> // FIXME: ugly, move to better structure
     @Entry(category = TEAM) public static Map<String, String> relations = new HashMap<>(); // <Username, Tag> // how does this render? // TODO: move to custom renderer
     @Entry(category = TEAM) public static List<String> noattack = Lists.newArrayList("team"); // TODO: move modifiers to a single map
@@ -37,6 +37,7 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
 
     public static final String UTIL = "util";
     @Entry(category = UTIL) public static boolean keepExtractCmd = false;
+    @Entry(category = UTIL) public static boolean alwaysAllDrop = true;
 
     @Entry(category = UTIL) public static Map<Integer, ItemStack> stash = new HashMap<>(); // FIXME: if possible, move to list, ContainerMixins Config.write is slow though, so the render thread causes an ioob
     @Entry(category = UTIL) public static Map<String, JsonObject> quests = new HashMap<>(); // <NPC, Quest>

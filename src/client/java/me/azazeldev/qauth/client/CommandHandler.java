@@ -8,6 +8,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.client.commands.TagCommands;
+import me.azazeldev.qauth.client.gui.QuestTracker;
+import me.azazeldev.qauth.client.gui.RelationshipManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.Commands;
@@ -39,7 +41,10 @@ public class CommandHandler {
         List<Pair<String, ArgumentType<?>>> tag = List.of( Pair.of("username", EntityArgument.player()), Pair.of("tag name", StringArgumentType.string()) );
         cmds.put("tag", tag);
 
-        cmds.put("taglist", null);
+        cmds.put("tags", null);
+
+
+        cmds.put("quests", null);
     }
     public static void registerBrigadier(CommandDispatcher<FabricClientCommandSource> dispatcher) { // FIXME: three different warnings, fix plz
         for (Map.Entry<String, List<Pair<String, ArgumentType<?>>>> e :  cmds.entrySet()) {
@@ -58,7 +63,6 @@ public class CommandHandler {
         }
     }
     private static int out(CommandContext<?> context) {
-        MainClient.sendClient(Component.literal(context.getInput()));
         return (execute("!"+context.getInput()) ? 1 : 0);
     }
     private static List<Pair<String, ArgumentType>> inf(String identifier, ArgumentType type) { return Stream.generate(() -> Pair.of(identifier, type)).limit(16).collect(Collectors.toList()); }
@@ -70,9 +74,11 @@ public class CommandHandler {
             case "drel", "deleterel", "dtag", "deletetag", "tagdelete" -> TagCommands::deleteTag;
             case "tag", "rel" -> TagCommands::tag;
             case "modtag", "modrel", "tagmodifier" -> TagCommands::addTagModifier;
-            case "taglist", "listtags" -> TagCommands::listTags;
+            case "tags", "rels" -> RelationshipManager::showGUI;
 
             case "test" -> CommandHandler::test;
+
+            //case "quests" -> QuestTracker::showGUI;
 
             default -> CommandHandler::EMPTY;
         };

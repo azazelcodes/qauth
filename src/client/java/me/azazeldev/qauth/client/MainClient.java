@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.azazeldev.qauth.Main;
+import me.azazeldev.qauth.client.gui.StashTracker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -14,10 +15,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.telemetry.events.WorldLoadEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.MinecraftServer;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -28,9 +27,12 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import static org.apache.commons.lang3.ArrayUtils.contains;
+
 public class MainClient implements ClientModInitializer {
 
     private static String[] ips = {"unauth.xyz","130.12.33.16"};
+    public static boolean onauth = false;
 
     public static KeyMapping markValuable;
 
@@ -55,9 +57,7 @@ public class MainClient implements ClientModInitializer {
             @Nullable ServerData server = Minecraft.getInstance().getCurrentServer();
             if (server == null) return;
             if (Minecraft.getInstance().isSingleplayer()) return;
-            System.out.println(server.ip);
-            // CRASH?
-            MainClient.sendClient(Component.literal("Hi!"));
+            if (contains(ips, server.ip)) onauth = true;
         });
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "stash_preview"), StashTracker::StashPreview); // FIXME: draw above all screens, even containers - how? idk

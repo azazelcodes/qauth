@@ -32,6 +32,8 @@ public class TagCommands {
             return true;
         }
 
+        if (args[1].equalsIgnoreCase("none")) return true;
+
         int col = (int)Long.parseLong(hex, 16);
         MainClient.sendClient(Component.literal(String.format("Added relationship tag %s with color #%s", args[1], hex)).withColor(col));
         Config.tags.put(args[1].toLowerCase(), 0xFF000000 | col);
@@ -40,7 +42,7 @@ public class TagCommands {
     }
     public static boolean deleteTag(String cmd) {
         String[] args = cmd.split(" ");
-        if (Config.tags.containsKey(args[1])) MainClient.sendClient(Component.literal("Removed %s from your relationship tags").withColor(0xFFFF0000));
+        if (Config.tags.containsKey(args[1])) MainClient.sendClient(Component.literal(String.format("Removed %s from your relationship tags", args[1])).withColor(0xFFFF0000));
         Config.tags.remove(args[1]);
         return true;
     }
