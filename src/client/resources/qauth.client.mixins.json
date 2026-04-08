@@ -14,10 +14,6 @@
   "mixins": [
     "AttackMixin",
     "ChatMixin",
-    "ContainerMixin",
-    "EntityMixin",
-    "PlayerAttackMixin",
-    "PlayerRendererMixin",
-    "TabMixin"
+    "ContainerMixin"
   ]
 }

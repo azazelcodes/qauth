@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import java.util.Map;
 import java.util.Objects;
 
-public class TagCommands {
+public class TagCommands { // disabled due to katherines request
     public static boolean createTag(String cmd) {
         String[] args = cmd.split(" ");
         if (args.length != 3) { // TODO: move error handling out of this, throw InvalidArguments and handle it in cmd.apply

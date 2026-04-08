@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class RelationshipManager extends Screen {
+public class RelationshipManager extends Screen { // disabled due to katherines request
     protected HeaderAndFooterLayout layout;
     protected LinearLayout scrollContainer;
     protected LinearLayout searchContainer;

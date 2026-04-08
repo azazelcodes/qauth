@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 public class CommandHandler {
     private static HashMap<String, List<Pair<String, ArgumentType<?>>>> cmds = new HashMap<>();
     public static void popCmds() {
-        List<Pair<String, ArgumentType<?>>> ctag = List.of( Pair.of("tag name", StringArgumentType.string()), Pair.of("color (as hex)", StringArgumentType.string()) );
+        /*List<Pair<String, ArgumentType<?>>> ctag = List.of( Pair.of("tag name", StringArgumentType.string()), Pair.of("color (as hex)", StringArgumentType.string()) );
         cmds.put("ctag", ctag);
         cmds.put("tagcreate", ctag);
 
@@ -42,7 +42,7 @@ public class CommandHandler {
         List<Pair<String, ArgumentType<?>>> tag = List.of( Pair.of("username", EntityArgument.player()), Pair.of("tag name", StringArgumentType.string()) );
         cmds.put("tag", tag);
 
-        cmds.put("tags", null);
+        cmds.put("tags", null);*/
 
 
         cmds.put("quests", null);
@@ -72,11 +72,11 @@ public class CommandHandler {
     public static boolean execute(String msg) {
         if (!msg.startsWith("!")) return false;
         Function<String, Boolean> cmd = switch (msg.substring(1).toLowerCase().split(" ")[0]) {
-            case "crel", "createrel", "ctag", "createtag", "tagcreate" -> TagCommands::createTag;
+            /*case "crel", "createrel", "ctag", "createtag", "tagcreate" -> TagCommands::createTag;
             case "drel", "deleterel", "dtag", "deletetag", "tagdelete" -> TagCommands::deleteTag;
             case "tag", "rel" -> TagCommands::tag;
             case "modtag", "modrel", "tagmodifier" -> TagCommands::addTagModifier;
-            case "tags", "rels" -> RelationshipManager::showGUI;
+            case "tags", "rels" -> RelationshipManager::showGUI;*/
 
             case "test" -> CommandHandler::test;
 

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AvatarRenderer.class)
 public class PlayerRendererMixin<AvatarlikeEntity extends Avatar & ClientAvatarEntity> {
-    /* // FIXME: this might be a little cheaty, gotta ask goat
+    /* // FIXME: this might be a little cheaty, gotta ask goat (update, karthy said no to the whole team system)
     @Inject(method = "shouldShowName", at = @At("RETURN"), cancellable = true)
     private void overrideName(final AvatarlikeEntity entity, final double distanceToCameraSq, CallbackInfoReturnable<Boolean> ci) { ci.setReturnValue(true); }
     */

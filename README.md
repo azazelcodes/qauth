@@ -52,3 +52,13 @@
   items you have in your stash. <br/>
   You will need to double-tap <strong>ESC</strong>!
 </p>
+
+<br/><br/><br/><br/><br/><br/>
+<p>
+    There is a team feature disabled by default because kkona said so.<br/>
+    These corresponding mixins have been disabled, they used to be in qauth.client.mixins.json:<br/>
+    "EntityMixin",
+    "PlayerAttackMixin",
+    "PlayerRendererMixin",
+    "TabMixin"
+</p>
