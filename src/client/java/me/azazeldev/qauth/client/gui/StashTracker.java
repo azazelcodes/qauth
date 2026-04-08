@@ -26,7 +26,7 @@ public class StashTracker {
         graphics.pose().pushMatrix();
         graphics.pose().scale(Config.slotSize * 0.75f);
         graphics.blit(RenderPipelines.GUI_TEXTURED, HOTBAR_TEXTURE,
-                (int) (Config.alignStashRight ? window.getGuiScaledWidth() * (1 / 0.75f) / Config.slotSize - 9 * 24 - 2 : 2), 2,
+                (int) (Config.flipHUD ? window.getGuiScaledWidth() * (1 / 0.75f) / Config.slotSize - 9 * 24 - 2 : 2), 2,
                 0, 0,
                 9 * 24, (int) Math.ceil((double) stash.size() / 9) * 24,
                 24, 24
@@ -35,7 +35,7 @@ public class StashTracker {
 
         int i = 0;
         for (Map.Entry<Integer, ItemStack> e : stash) { // FIXME: CENTER THESE BETTER!! fwiquin hud changes. 1.21 was so much better </3
-            int ix = (int) (Config.alignStashRight ? window.getGuiScaledWidth() / Config.slotSize - 9 * slotSize - 2 + (i % 9) * slotSize : 2 + (i % 9) * slotSize);
+            int ix = (int) (Config.flipHUD ? window.getGuiScaledWidth() / Config.slotSize - 9 * slotSize - 2 + (i % 9) * slotSize : 2 + (i % 9) * slotSize);
             int iy = 2 + (int) Math.floor((double) i / 9) * slotSize;
             graphics.pose().pushMatrix();
             graphics.pose().scale(Config.slotSize);

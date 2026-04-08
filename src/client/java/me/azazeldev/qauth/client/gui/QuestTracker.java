@@ -2,11 +2,14 @@ package me.azazeldev.qauth.client.gui;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.platform.Window;
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.Main;
 import me.azazeldev.qauth.client.MainClient;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.layouts.*;
@@ -20,7 +23,6 @@ public class QuestTracker extends Screen {
 
     //public static Item[] questi = {Items.ORANGE_STAINED_GLASS_PANE, Items.RED_STAINED_GLASS_PANE};
     public static Map<String, JsonObject> questIndices = new HashMap<>(); // <NPC, Indices> // FIXME: ugly
-    public static boolean shouldOpenQT = false;
 
     public static void fetchQuest(String npc, String questName) {
         questIndices.put(npc, MainClient.fetchAPI("quests/"+npc+".index"));
@@ -45,8 +47,26 @@ public class QuestTracker extends Screen {
         Config.write(Main.MOD_ID);
     }
 
+    // HUD
+    private static JsonObject trackedQuest;
+    public static void QuestPreview(GuiGraphics graphics, DeltaTracker delta) {
+        if (!Config.renderQuest) return;
+        if (trackedQuest == null) return;
+        Window window = Minecraft.getInstance().getWindow();
+        Font font = Minecraft.getInstance().font;
+        int i = 0;
+        for (Component c : componentifyQuest(trackedQuest)) { // FIXME: move this to an actual tracker using AttackMixin for kills, Inventory.contains() for hand_in, raid collection by tracking items in containermixin during raid state for collect, area checking with area api (WIP) and rc detection
+            int x = !Config.flipHUD ? window.getGuiScaledWidth() - font.width(c) -4 : 4;
+            graphics.drawString(font, c, x, 4+i*font.lineHeight, 0xFFFFFFFF, true);
+            i++;
+        }
+    }
+
+
 
     // GUI - I really tried using TabNavigationBar, it didnt fwiquin work after FIVE HOURS
+    public static boolean shouldOpenQT = false;
+
     private final HeaderAndFooterLayout layout;
     private LinearLayout tabBar;
     private String npcTab;
@@ -117,17 +137,7 @@ public class QuestTracker extends Screen {
 
 
             LinearLayout questContent = tabContent.addChild(LinearLayout.vertical().spacing(8));
-            questContent.addChild(new StringWidget(Component.literal(quest.get("name").getAsString()), QuestTracker.this.font));
-
-            questContent.addChild(new StringWidget(Component.literal("ᴄᴏɴᴅɪᴛɪᴏɴꜱ").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.DARK_GRAY), QuestTracker.this.font));
-            for (Map.Entry<String, JsonElement> condition : quest.get("cond").getAsJsonObject().entrySet()) {
-                questContent.addChild(new StringWidget(Component.literal(MainClient.capitalize(condition.getKey())).withStyle(ChatFormatting.GRAY).append(" ").append(Component.literal(stringifyCondition(condition)).withColor(0xFFFFFFFF)), QuestTracker.this.font));
-            }
-
-            questContent.addChild(new StringWidget(Component.literal("ʀᴇᴡᴀʀᴅꜱ").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.DARK_GRAY), QuestTracker.this.font));
-            for (Map.Entry<String, JsonElement> reward : quest.get("rew").getAsJsonObject().entrySet()) { // TODO: add reward rendering
-                //questContent.addChild(new StringWidget(, QuestTracker.this.font));
-            }
+            for (Component c : QuestTracker.componentifyQuest(this.quest)) questContent.addChild(new StringWidget(c,QuestTracker.this.font));
 
 
             if (multipleQ)
@@ -138,6 +148,13 @@ public class QuestTracker extends Screen {
 
             tabContent.newCellSettings().alignHorizontallyCenter();
             tabContent.newCellSettings().alignVerticallyMiddle();
+
+            LinearLayout footer = QuestTracker.this.layout.addToFooter(LinearLayout.horizontal().spacing(3));
+            footer.defaultCellSetting().alignHorizontallyCenter();
+            footer.addChild(Button.builder(
+                    Component.literal("Track on HUD"),
+                    (Button button) -> QuestTracker.trackedQuest = this.quest
+            ).build());
         }
 
         private void setCurrent(int i) {
@@ -160,11 +177,27 @@ public class QuestTracker extends Screen {
     }
 
 
+    private static List<Component> componentifyQuest(JsonObject quest) {
+        List<Component> components = new ArrayList<>();
+        components.add(Component.literal(quest.get("name").getAsString()));
+
+        components.add(Component.literal("ᴄᴏɴᴅɪᴛɪᴏɴꜱ").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.DARK_GRAY));
+        for (Map.Entry<String, JsonElement> condition : quest.get("cond").getAsJsonObject().entrySet()) {
+            components.add(Component.literal(MainClient.capitalize(condition.getKey())).withStyle(ChatFormatting.GRAY).append(" ").append(Component.literal(stringifyCondition(condition)).withColor(0xFFFFFFFF)));
+        }
+
+        components.add(Component.literal("ʀᴇᴡᴀʀᴅꜱ").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.DARK_GRAY));
+        for (Map.Entry<String, JsonElement> reward : quest.get("rew").getAsJsonObject().entrySet()) { // TODO: add reward rendering
+            //components.add();
+        }
+
+        return components;
+    }
     private static String stringifyCondition(Map.Entry<String, JsonElement> condition) {
         String s = "";
         switch (condition.getKey()) {
             case "kill", "collect", "hand_in":
-                for (Map.Entry<String, JsonElement> k : condition.getValue().getAsJsonObject().entrySet()) s += k.getValue().getAsString() + " " + MainClient.capitalize(k.getKey()) + (k.getValue().getAsInt() > 1 ? "s" : "") + ", ";
+                for (Map.Entry<String, JsonElement> k : condition.getValue().getAsJsonObject().entrySet()) s += k.getValue().getAsString() + " " + MainClient.capitalize(k.getKey()) + (k.getValue().getAsInt() > 1 ? "s" : "") + ", "; // minor spelling mistake for 3 bone mealS
                 s = s.substring(0, s.length()-2);
                 break;
             case "mark":

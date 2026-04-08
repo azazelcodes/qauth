@@ -7,7 +7,8 @@
 
     "qauth.midnightconfig.ui": "UI",
     "qauth.midnightconfig.renderStash": "Render a stash HUD",
-    "qauth.midnightconfig.alignStashRight": "Align stash HUD right",
+    "qauth.midnightconfig.renderQuest": "Render a quest HUD",
+    "qauth.midnightconfig.flipHUD": "Flip stash and quest HUD",
     "qauth.midnightconfig.stash": "",
     "qauth.midnightconfig.valuables": "",
 }

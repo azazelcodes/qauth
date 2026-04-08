@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.azazeldev.qauth.Main;
+import me.azazeldev.qauth.client.gui.QuestTracker;
 import me.azazeldev.qauth.client.gui.StashTracker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -63,6 +64,7 @@ public class MainClient implements ClientModInitializer {
         });
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "stash_preview"), StashTracker::StashPreview); // FIXME: draw above all screens, even containers - how? idk
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "quest_preview"), QuestTracker::QuestPreview);
     }
 
     public static void sendClient(Component msg) {

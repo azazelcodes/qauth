@@ -24,7 +24,8 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
 
     public static final String UI = "ui";
     @Entry(category = UI) public static boolean renderStash = true;
-    @Entry(category = UI) public static boolean alignStashRight = false;
+    @Entry(category = UI) public static boolean renderQuest = true;
+    @Entry(category = UI) public static boolean flipHUD = false;
     @Entry(category = UI) public static List<Item> valuables = Lists.newArrayList(Items.TWISTING_VINES, Items.PRISMARINE_SHARD, Items.BLAZE_ROD, Items.BREEZE_ROD);
 
     @Entry(category = UI) public static boolean markBarrels = true;
