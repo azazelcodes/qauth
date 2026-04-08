@@ -36,6 +36,8 @@ public class MainClient implements ClientModInitializer {
 
     public static KeyMapping markValuable;
 
+    public static String lastNPC;
+
     @Override
     public void onInitializeClient() {
         KeyMapping.Category MAIN_CATEGORY = KeyMapping.Category.register(
@@ -111,4 +113,6 @@ public class MainClient implements ClientModInitializer {
         }
         return null;
     }
+
+    public static String capitalize(String s) { String ws = ""; for (String w : s.split("_")) ws += w.substring(0, 1).toUpperCase() + w.substring(1) + " "; return ws.substring(0,ws.length()-1); }
 }

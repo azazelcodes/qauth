@@ -40,7 +40,7 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
     @Entry(category = UTIL) public static boolean alwaysAllDrop = true;
 
     @Entry(category = UTIL) public static Map<Integer, ItemStack> stash = new HashMap<>(); // FIXME: if possible, move to list, ContainerMixins Config.write is slow though, so the render thread causes an ioob
-    @Entry(category = UTIL) public static Map<String, JsonObject> quests = new HashMap<>(); // <NPC, Quest>
+    @Entry(category = UTIL) public static Map<String, List<JsonObject>> quests = new HashMap<>(); // <NPC, Quest>
 
 
     public static <T> boolean toggleItem(List<T> list, T target) {

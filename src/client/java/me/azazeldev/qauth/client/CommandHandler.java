@@ -12,6 +12,7 @@ import me.azazeldev.qauth.client.gui.QuestTracker;
 import me.azazeldev.qauth.client.gui.RelationshipManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
@@ -62,6 +63,7 @@ public class CommandHandler {
             dispatcher.register(pass0.then(lpass));
         }
     }
+    public static boolean isCmd(String s) { return cmds.containsKey(s); };
     private static int out(CommandContext<?> context) {
         return (execute("!"+context.getInput()) ? 1 : 0);
     }
@@ -78,7 +80,7 @@ public class CommandHandler {
 
             case "test" -> CommandHandler::test;
 
-            //case "quests" -> QuestTracker::showGUI;
+            case "quests" -> QuestTracker::showGUI;
 
             default -> CommandHandler::EMPTY;
         };
@@ -88,7 +90,7 @@ public class CommandHandler {
     private static boolean EMPTY(String cmd) { return false; }
 
     private static boolean test(String cmd) {
-        //Config.stash.add(new ItemStack(Item.byId(Integer.parseInt(cmd.split(" ")[1])), Integer.parseInt(cmd.split(" ")[2])));
+        Minecraft.getInstance().player.connection.sendChat("/stash");
         return true;
     }
 

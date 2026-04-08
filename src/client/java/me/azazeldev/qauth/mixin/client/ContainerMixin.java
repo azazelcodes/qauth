@@ -47,11 +47,14 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
 
     @Shadow public abstract T getMenu();
 
+    @Shadow public abstract void onClose();
+
     // TODO: maybe better management with state enum?
     @Unique
     boolean stashS = false;
     @Unique
-    //boolean questS = false;
+    boolean questS = false;
+    @Unique
     boolean profileS = false;
     @Unique
     boolean shopS = false;
@@ -68,7 +71,6 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
         System.out.println("Constructor!");
         String t = title.getString().toLowerCase();
 
-
         stashS = t.contains("stash");
         if (stashS) page = Integer.parseInt(t.split(" \\| page ")[1])-1;
         else {
@@ -76,12 +78,15 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
             Config.write(Main.MOD_ID);
         } // FIXME: inefficient, on every container open repop stashables
 
-        //questS = t.endsWith("quests");
+        questS = t.endsWith("quests");
         profileS = t.startsWith("profile") && t.endsWith(Minecraft.getInstance().player.getPlainTextName());
         shopS = t.contains("shop");
         npc = "";
-        if (/*questS || */shopS) npc = t.split(" ")[0];
-        QuestTracker.questIndices.remove(npc);
+        if (questS || shopS) {
+            npc = t.split(" ")[0];
+            MainClient.lastNPC = npc;
+        }
+        if (profileS) QuestTracker.clear();
     }
     // FIXME: menu.getType crashes on player inventory => way to check if container
     @Inject(method = "init()V", at = @At("HEAD"))
@@ -112,11 +117,16 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
         // FIXME: as soon as I added this, katherine added /profile, which also has the players current quest! this can be removed as soon as /profile shows ALL accepted quests, see FIXME below
 
         // new quest tracker
-        if (profileS && slot.index < 3 && !QuestTracker.questIndices.containsKey(npc)) {
+        if (profileS && slot.index < 3) {
+            String qnpc = slot.getItem().getDisplayName().toFlatList().get(1).getString().toLowerCase();
+            if (QuestTracker.questIndices.containsKey(qnpc)) return;
             List<Component> lore = slot.getItem().get(DataComponents.LORE).lines(); // FIXME: only last accepted quest, karthylynne plez fix -> once added, loop over all lines, if startsWith("Quest: ") add
             String quest = lore.get(lore.size()-2).toFlatList().get(1).getString();
-            String qnpc = slot.getItem().getDisplayName().toFlatList().get(1).getString().toLowerCase();
             if (!quest.equals("Not Started")) QuestTracker.fetchQuest(qnpc, quest);
+        }
+        if (profileS && slot.index == 4 && QuestTracker.shouldOpenQT) {
+            Minecraft.getInstance().player.closeContainer();
+            QuestTracker.showGUI(String.format("quests_fetched %s %s", MainClient.lastNPC, 0));
         }
 
         // barrel marking
