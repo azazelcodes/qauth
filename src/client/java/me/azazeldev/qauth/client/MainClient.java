@@ -13,7 +13,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
-import net.minecraft.ChatFormatting;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.platform.modcommon.MinecraftClientAudiences;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
@@ -66,11 +69,12 @@ public class MainClient implements ClientModInitializer {
         // TODO: move to Raised
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "stash_preview"), StashTracker::StashPreview); // FIXME: draw above all screens, even containers - how? idk
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "quest_preview"), QuestTracker::QuestPreview);
-        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "event_preview"), EventTracker::EventPreview);
+        //HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "event_preview"), EventTracker::EventPreview);
     }
 
-    public static void sendClient(Component msg) {
-        Minecraft.getInstance().gui.getChat().addMessage(Component.literal("qa>>").withStyle(ChatFormatting.ITALIC).withColor(0xC889CFF0).append(Component.literal(" ").withStyle(ChatFormatting.RESET).append(msg))); // TODO: move to minimessage
+    public static void sendClient(String msg) {
+        final Audience client = MinecraftClientAudiences.of().audience();
+        client.sendMessage(MiniMessage.miniMessage().deserialize("<italic><yellow>qa>></yellow></italic><aqua> <msg>", Placeholder.parsed("msg",msg)));
     }
 
     public static JsonObject fetchAPI(String path) { // FIXME: faster plz
@@ -118,5 +122,7 @@ public class MainClient implements ClientModInitializer {
         return null;
     }
 
+    public static Component nativifyKyori(net.kyori.adventure.text.Component msg) { return MinecraftClientAudiences.of().asNative(msg); }
+    public static Component nativifyMiniMessage(String msg) { return MinecraftClientAudiences.of().asNative(MiniMessage.miniMessage().deserialize(msg)); }
     public static String capitalize(String s) { String ws = ""; for (String w : s.split("_")) ws += w.substring(0, 1).toUpperCase() + w.substring(1) + " "; return ws.substring(0,ws.length()-1); }
 }

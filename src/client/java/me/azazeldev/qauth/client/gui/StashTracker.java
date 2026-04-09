@@ -1,13 +1,15 @@
 package me.azazeldev.qauth.client.gui;
 
 import com.mojang.blaze3d.platform.Window;
-import me.azazeldev.qauth.Config;
+import me.azazeldev.qauth.client.Config;
+import me.azazeldev.qauth.client.MainClient;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
@@ -49,7 +51,7 @@ public class StashTracker {
                 continue;
             }
             Font font = Minecraft.getInstance().font;
-            graphics.textRenderer().accept(ix + slotSize - font.width(String.valueOf(e.getValue().getCount())) - 1, iy + slotSize - font.lineHeight - 1, Component.literal(String.valueOf(e.getValue().getCount())).withColor(0xFFA9A9A9));
+            graphics.textRenderer().accept(ix + slotSize - font.width(String.valueOf(e.getValue().getCount())) - 1, iy + slotSize - font.lineHeight - 1, MainClient.nativifyKyori(MiniMessage.miniMessage().deserialize("<gray><amount>", Placeholder.unparsed("amount",String.valueOf(e.getValue().getCount())))));
             graphics.pose().popMatrix();
         }
     }

@@ -1,7 +1,7 @@
 package me.azazeldev.qauth.mixin.client;
 
-import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.client.CommandHandler;
+import me.azazeldev.qauth.client.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;

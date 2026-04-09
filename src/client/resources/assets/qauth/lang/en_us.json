@@ -1,0 +1,16 @@
+{
+  "key.category.qauth.qauth": "qauth",
+    "key.qauth.mark_valuable": "Mark hovered as valuable",
+
+
+
+  "qauth.config.generic.enable": "Enable",
+
+  "qauth.config.ui": "UI",
+    "qauth.config.ui.stash": "Stash HUD",
+      "qauth.config.ui.stash.size": "Scale",
+    "qauth.config.ui.extra": "Extra HUD",
+      "qauth.config.ui.quest": "Quest Tracker",
+      "qauth.config.ui.event": "Event Timer",
+    "qauth.config.ui.flip": "Flip elements"
+}

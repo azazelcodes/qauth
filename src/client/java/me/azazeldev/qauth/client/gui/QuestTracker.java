@@ -3,8 +3,8 @@ package me.azazeldev.qauth.client.gui;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.Window;
-import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.Main;
+import me.azazeldev.qauth.client.Config;
 import me.azazeldev.qauth.client.MainClient;
 import me.azazeldev.qauth.client.StateManager;
 import net.minecraft.ChatFormatting;
@@ -12,13 +12,19 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.*;
-import net.minecraft.client.gui.layouts.*;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class QuestTracker extends Screen {
 
@@ -39,15 +45,14 @@ public class QuestTracker extends Screen {
             l.add(MainClient.fetchAPI("quests/"+npc+"/"+index));
             Config.quests.put(npc, l);
         }
-        else MainClient.sendClient(Component.literal("Your current quest was not found on the API, please message @im.azazel on Discord!").withColor(0xFFFF0000));
-
-        Config.write(Main.MOD_ID);
+        else MainClient.sendClient("<red>Your current quest was not found on the API, please message @im.azazel on Discord!");
+        Config.HANDLER.save();
     }
 
     public static void clear() {
         QuestTracker.questIndices.clear();
         Config.quests.clear();
-        Config.write(Main.MOD_ID);
+        Config.HANDLER.save();
     }
 
     // HUD
@@ -184,12 +189,12 @@ public class QuestTracker extends Screen {
         List<Component> components = new ArrayList<>();
         components.add(Component.literal(quest.get("name").getAsString()));
 
-        components.add(Component.literal("ᴄᴏɴᴅɪᴛɪᴏɴꜱ").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.DARK_GRAY));
+        components.add(MainClient.nativifyMiniMessage("<italic><underlined><dark_gray>ᴄᴏɴᴅɪᴛɪᴏɴꜱ"));
         for (Map.Entry<String, JsonElement> condition : quest.get("cond").getAsJsonObject().entrySet()) {
-            components.add(Component.literal(MainClient.capitalize(condition.getKey())).withStyle(ChatFormatting.GRAY).append(" ").append(Component.literal(stringifyCondition(condition)).withColor(0xFFFFFFFF)));
+            components.add(Component.literal(MainClient.capitalize(condition.getKey())).withStyle(ChatFormatting.GRAY).append(" ").append(Component.literal(stringifyCondition(condition)).withColor(0xFFFFFFFF))); // todo: move to minimessage
         }
 
-        components.add(Component.literal("ʀᴇᴡᴀʀᴅꜱ").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.DARK_GRAY));
+        components.add(MainClient.nativifyMiniMessage("<italic><underlined><dark_gray>ᴄᴏɴᴅɪᴛɪᴏɴꜱ"));
         for (Map.Entry<String, JsonElement> reward : quest.get("rew").getAsJsonObject().entrySet()) { // TODO: add reward rendering
             //components.add();
         }

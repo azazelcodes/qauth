@@ -10,14 +10,11 @@
   "icon": "assets/qauth/icon.png",
   "environment": "client",
   "entrypoints": {
-    "fabric-datagen": [
-      "me.azazeldev.qauth.client.MainDataGenerator"
-    ],
     "client": [
       "me.azazeldev.qauth.client.MainClient"
     ],
-    "main": [
-      "me.azazeldev.qauth.Main"
+    "modmenu": [
+      "me.azazeldev.qauth.client.ModMenuIntegration"
     ]
   },
   "mixins": [
@@ -30,6 +27,7 @@
   "depends": {
     "fabricloader": ">=0.18.5",
     "fabric-api": "*",
-    "minecraft": "~1.21.11"
+    "minecraft": "~1.21.11",
+    "yet_another_config_lib_v3": ">=3.8.2"
   }
 }

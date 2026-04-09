@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 public class CommandHandler {
     private static HashMap<String, List<Pair<String, ArgumentType<?>>>> cmds = new HashMap<>();
     public static void popCmds() {
+        cmds.put("qauth", null);
         cmds.put("quests", null);
     }
     public static void registerBrigadier(CommandDispatcher<FabricClientCommandSource> dispatcher) { // FIXME: three different warnings, fix plz
@@ -49,13 +50,12 @@ public class CommandHandler {
 
     public static boolean execute(String msg) {
         if (!msg.startsWith("!")) return false;
+        if (msg.startsWith("!qauth")) { // settings ui
+            // FIXME: not work?
+            Config.buildUI(null);
+            return true;
+        }
         Function<String, Boolean> cmd = switch (msg.substring(1).toLowerCase().split(" ")[0]) {
-            /*case "crel", "createrel", "ctag", "createtag", "tagcreate" -> TagCommands::createTag;
-            case "drel", "deleterel", "dtag", "deletetag", "tagdelete" -> TagCommands::deleteTag;
-            case "tag", "rel" -> TagCommands::tag;
-            case "modtag", "modrel", "tagmodifier" -> TagCommands::addTagModifier;
-            case "tags", "rels" -> RelationshipManager::showGUI;*/
-
             case "test" -> CommandHandler::test;
 
             case "quests" -> QuestTracker::showGUI;

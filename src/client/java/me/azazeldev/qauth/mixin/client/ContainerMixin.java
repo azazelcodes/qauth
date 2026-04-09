@@ -1,7 +1,6 @@
 package me.azazeldev.qauth.mixin.client;
 
-import me.azazeldev.qauth.Config;
-import me.azazeldev.qauth.Main;
+import me.azazeldev.qauth.client.Config;
 import me.azazeldev.qauth.client.MainClient;
 import me.azazeldev.qauth.client.StateManager;
 import me.azazeldev.qauth.client.gui.QuestTracker;
@@ -76,7 +75,7 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
         if (StateManager.getState() == StateManager.AuthState.STASH) page = Integer.parseInt(t.split(" \\| page ")[1]) - 1;
         else {
             stashables = Config.stash.values().stream().map(ItemStack::getItem).toList();
-            Config.write(Main.MOD_ID);
+            Config.HANDLER.save();
         } // FIXME: inefficient, on every container open repop stashables
 
         npc = "";
@@ -103,7 +102,7 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
         // stash tracker
         if (StateManager.getState() == StateManager.AuthState.STASH && slot.index < 5*9 && !contains(StashTracker.nostash, disp.get(1).getString())) {
             Config.stash.put(5*9*page+slot.index, slot.getItem()); // FIXME: inefficient, on every render repop stash + write it!! => ioob for regular list
-            Config.write(Main.MOD_ID);
+            Config.HANDLER.save();
             return;
         }
 
@@ -131,9 +130,9 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
         if (!Config.markBarrels) return;
         int col = 0x00FFFFFF;
 
+        if (stashables.contains(slot.getItem().getItem())) col = 0xA80000FF;
         if (minecraft.player.getInventory().contains(slot.getItem())) col = 0xA800FF00;
         if (Config.valuables.contains(slot.getItem().getItem())) col = 0xA8FFFF00;
-        if (stashables.contains(slot.getItem().getItem())) col = 0xA80000FF;
         graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, col);
     }
 

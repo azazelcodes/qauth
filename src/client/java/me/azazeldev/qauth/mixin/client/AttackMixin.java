@@ -1,8 +1,7 @@
 package me.azazeldev.qauth.mixin.client;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import me.azazeldev.qauth.Config;
-import me.azazeldev.qauth.client.MainClient;
+import me.azazeldev.qauth.client.Config;
 import me.azazeldev.qauth.client.StateManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
