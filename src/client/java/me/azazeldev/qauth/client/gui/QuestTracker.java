@@ -6,6 +6,7 @@ import com.mojang.blaze3d.platform.Window;
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.Main;
 import me.azazeldev.qauth.client.MainClient;
+import me.azazeldev.qauth.client.StateManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -29,7 +30,9 @@ public class QuestTracker extends Screen {
 
         System.out.println(npc);
         System.out.println(questName);
-        String index = questIndices.get(npc).get(questName).getAsString();
+        JsonElement q = questIndices.get(npc).get(questName);
+        String index = null;
+        if (q != null) index = q.getAsString();
         if (index != null) {
             List<JsonObject> l = new ArrayList<>();
             if (Config.quests.containsKey(npc)) l.addAll(Config.quests.get(npc));
@@ -166,7 +169,7 @@ public class QuestTracker extends Screen {
     public static boolean showGUI(String cmd) {
         Screen s = Minecraft.getInstance().screen;
         if (s != null && !(s.getClass() == ChatScreen.class || s.getTitle().getString().toLowerCase().contains("profile") || s.getClass() == QuestTracker.class)) return true;
-        if (!shouldOpenQT) Minecraft.getInstance().player.connection.sendCommand("profile"); // refetch quests on open
+        if (!shouldOpenQT && StateManager.getState() == StateManager.AuthState.LOBBY) Minecraft.getInstance().player.connection.sendCommand("profile"); // refetch quests on open
         shouldOpenQT = true;
         if (cmd.startsWith("quests_fetched")) { // FIXME: ugly workaround
             shouldOpenQT = false;

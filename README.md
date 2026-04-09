@@ -55,10 +55,6 @@
 
 <br/><br/><br/><br/><br/><br/>
 <p>
-    There is a team feature disabled by default because kkona said so.<br/>
-    These corresponding mixins have been disabled, they used to be in qauth.client.mixins.json:<br/>
-    "EntityMixin",
-    "PlayerAttackMixin",
-    "PlayerRendererMixin",
-    "TabMixin"
+    There was a team feature which has now moved to its own repository because kkona said so.<br/>
+    <a href="https://github.com/azazelcodes/teamnet">You can find it here</a>
 </p>

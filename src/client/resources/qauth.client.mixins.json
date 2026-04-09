@@ -4,6 +4,7 @@
   "package": "me.azazeldev.qauth.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "PacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1
@@ -14,6 +15,7 @@
   "mixins": [
     "AttackMixin",
     "ChatMixin",
-    "ContainerMixin"
+    "ContainerMixin",
+    "GUIMixin"
   ]
 }

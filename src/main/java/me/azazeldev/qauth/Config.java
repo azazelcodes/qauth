@@ -3,8 +3,6 @@ package me.azazeldev.qauth;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import eu.midnightdust.lib.config.MidnightConfig;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -13,19 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Config extends MidnightConfig { // TODO: move teammates to custom config looping over entries and displaying all of them, if possible do this in the midnightlib window
-    public static final String TEAM = "team";
-    @Comment(category = TEAM) public static Comment teamtut; // FIXME: maybe MAYBE move to UUID, dont know if its worth the effort of parsing them from username string with the lifetime of this server though
-    @Entry(category = TEAM) public static Map<String, Integer> tags = new HashMap<>(); // <Tag, Color> // FIXME: ugly, move to better structure
-    @Entry(category = TEAM) public static Map<String, String> relations = new HashMap<>(); // <Username, Tag> // how does this render? // TODO: move to custom renderer
-    @Entry(category = TEAM) public static List<String> noattack = Lists.newArrayList("team"); // TODO: move modifiers to a single map
-    @Entry(category = TEAM) public static List<String> flip = Lists.newArrayList("team");
-
-
+public class Config extends MidnightConfig {
     public static final String UI = "ui";
     @Entry(category = UI) public static boolean renderStash = true;
     @Entry(category = UI) public static boolean renderQuest = true;
     @Entry(category = UI) public static boolean flipHUD = false;
+    @Entry(category = UI) public static boolean renderEvents = true;
     @Entry(category = UI) public static List<Item> valuables = Lists.newArrayList(Items.TWISTING_VINES, Items.PRISMARINE_SHARD, Items.BLAZE_ROD, Items.BREEZE_ROD);
 
     @Entry(category = UI) public static boolean markBarrels = true;
@@ -39,6 +30,7 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
     public static final String UTIL = "util";
     @Entry(category = UTIL) public static boolean keepExtractCmd = false;
     @Entry(category = UTIL) public static boolean alwaysAllDrop = true;
+    @Entry(category = UTIL) public static boolean noDropHand = true;
 
     @Entry(category = UTIL) public static Map<Integer, ItemStack> stash = new HashMap<>(); // FIXME: if possible, move to list, ContainerMixins Config.write is slow though, so the render thread causes an ioob
     @Entry(category = UTIL) public static Map<String, List<JsonObject>> quests = new HashMap<>(); // <NPC, Quest>
@@ -49,16 +41,5 @@ public class Config extends MidnightConfig { // TODO: move teammates to custom c
         if (c) list.remove(target); else list.add(target);
         Config.write(Main.MOD_ID);
         return !c;
-    }
-
-    public static Component getRel(String name) {
-        Component n = Component.empty();
-        String relation = Config.relations.get(name);
-        if (relation != null) {
-            n = Component.literal("["+relation+"]")
-                    .withStyle(ChatFormatting.BOLD)
-                    .withColor(Config.tags.get(relation));
-        }
-        return n;
     }
 }

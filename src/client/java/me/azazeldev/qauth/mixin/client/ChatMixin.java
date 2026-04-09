@@ -1,22 +1,17 @@
 package me.azazeldev.qauth.mixin.client;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import me.azazeldev.qauth.Config;
 import me.azazeldev.qauth.client.CommandHandler;
-import me.azazeldev.qauth.client.MainClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(ChatScreen.class)
 public class ChatMixin {

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.azazeldev.qauth.Main;
+import me.azazeldev.qauth.client.gui.EventTracker;
 import me.azazeldev.qauth.client.gui.QuestTracker;
 import me.azazeldev.qauth.client.gui.StashTracker;
 import net.fabricmc.api.ClientModInitializer;
@@ -33,7 +34,6 @@ import static org.apache.commons.lang3.ArrayUtils.contains;
 public class MainClient implements ClientModInitializer {
 
     private static String[] ips = {"unauth.xyz","130.12.33.16"};
-    public static boolean onauth = false;
 
     public static KeyMapping markValuable;
 
@@ -60,11 +60,13 @@ public class MainClient implements ClientModInitializer {
             @Nullable ServerData server = Minecraft.getInstance().getCurrentServer();
             if (server == null) return;
             if (Minecraft.getInstance().isSingleplayer()) return;
-            if (contains(ips, server.ip)) onauth = true;
+            if (contains(ips, server.ip)) StateManager.setState(StateManager.AuthState.LOBBY);
         });
 
+        // TODO: move to Raised
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "stash_preview"), StashTracker::StashPreview); // FIXME: draw above all screens, even containers - how? idk
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "quest_preview"), QuestTracker::QuestPreview);
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "event_preview"), EventTracker::EventPreview);
     }
 
     public static void sendClient(Component msg) {
