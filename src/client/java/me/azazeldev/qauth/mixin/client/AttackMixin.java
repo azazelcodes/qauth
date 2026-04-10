@@ -2,6 +2,7 @@ package me.azazeldev.qauth.mixin.client;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import me.azazeldev.qauth.client.Config;
+import me.azazeldev.qauth.client.MainClient;
 import me.azazeldev.qauth.client.StateManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -34,11 +35,5 @@ public class AttackMixin { // TODO: possibly account for fire aspect or other ap
     private void onSweep(Entity entity, float baseDamage, DamageSource damageSource, float attackStrengthScale, CallbackInfo ci,
                          @Local LivingEntity nearby) {
         if (nearby.isDeadOrDying()) StateManager.incrementKills(nearby.getType());
-    }
-
-
-    @Inject(method = "drop", at = @At("RETURN"), cancellable = true)
-    private void onDrop(ItemStack itemStack, boolean bl, CallbackInfoReturnable<ItemEntity> ci) {
-        if (bl && Config.noDropHand) ci.cancel();
     }
 }

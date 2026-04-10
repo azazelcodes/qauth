@@ -4,7 +4,10 @@
   "package": "me.azazeldev.qauth.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "PacketMixin"
+    "CPlayerMixin",
+    "EntityRendererMixin",
+    "PacketMixin",
+    "PlayerRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

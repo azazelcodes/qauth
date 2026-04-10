@@ -87,11 +87,43 @@ public class Config {
                         .build()
                 )
 
-                // FIXME: add util
-                /*.category(ConfigCategory.createBuilder()
-                            .name(Component.literal("Utility")
-                        ).build()
-                )*/
+                .category(ConfigCategory.createBuilder()
+                        .name(Component.translatable("qauth.config.util"))
+                        .group(OptionGroup.createBuilder()
+                                .name(Component.literal(""))
+
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Component.translatable("qauth.config.util.keepextract"))
+                                        .binding(true, () -> keepExtractCmd, newVal -> keepExtractCmd = newVal)
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Component.translatable("qauth.config.util.alldrop"))
+                                        .binding(true, () -> alwaysAllDrop, newVal -> alwaysAllDrop = newVal)
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Component.translatable("qauth.config.util.handdrop"))
+                                        .binding(true, () -> noDropHand, newVal -> noDropHand = newVal)
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Component.translatable("qauth.config.util.hideni"))
+                                        .binding(false, () -> hideNearInteract, newVal -> hideNearInteract = newVal)
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+
+                                .build()
+                        )
+                        .build()
+                )
 
                 .build()
                 .generateScreen(parent);
@@ -123,14 +155,16 @@ public class Config {
     public static boolean alwaysAllDrop = true;
     @SerialEntry
     public static boolean noDropHand = true;
+    @SerialEntry
+    public static boolean hideNearInteract = false;
 
 
 
     // this is just to save data, not for "configuration"
     @SerialEntry
     public static List<Item> valuables = Lists.newArrayList(Items.TWISTING_VINES, Items.PRISMARINE_SHARD, Items.BLAZE_ROD, Items.BREEZE_ROD);
-    @SerialEntry
-    public static Map<Integer, ItemStack> stash = new HashMap<>(); // FIXME: if possible, move to list, ContainerMixins Config.get().write is slow though, so the render thread causes an ioob
+    @SerialEntry // FIXME: not serializable because of Option<>
+    public static List<ItemStack> stash = Lists.newArrayList(); // FIXME: if possible, move to list
     @SerialEntry
     public static Map<String, List<JsonObject>> quests = new HashMap<>(); // <NPC, Quest>
 

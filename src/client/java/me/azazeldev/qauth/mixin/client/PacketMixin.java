@@ -1,5 +1,6 @@
 package me.azazeldev.qauth.mixin.client;
 
+import me.azazeldev.qauth.client.MainClient;
 import me.azazeldev.qauth.client.gui.EventTracker;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
@@ -32,6 +33,7 @@ public class PacketMixin {
     private void onSChat(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
         List<Component> l = clientboundSystemChatPacket.content().toFlatList();
         String f = l.getFirst().getString();
+        // if (f.contains("active")) EventTracker.refresh(); // TODO:
         if (f.contains("cooldown:")) EventTracker.parse(l.getLast().getString(), f);
     }
 }

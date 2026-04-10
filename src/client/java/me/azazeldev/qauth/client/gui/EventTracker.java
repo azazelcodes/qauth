@@ -46,6 +46,12 @@ public class EventTracker {
     }
     public static void refresh() {
         if (true) return; // FIXME: this kicks for spamming because of the render loop. put this on a different thread?
+        /* // TODO: fix
+         * wait until a message related to event trigger passes
+         * this could be:
+         * - hideout: "&kXXX s hideout is unlocking" ?
+         * - radio: "\n\n! The virtue building radio control is about to unlock!\n\n" / "\n\n! The virtue building radio control is now unlocked\n\n"
+         */
         if (StateManager.getState() == StateManager.AuthState.OFFLINE) return;
         if (triedRefresh) { // FIXME: this is ugly and temporary, make it refresh automatically on a 10min timer
             MainClient.sendClient("<red>Tried refreshing timers already, try manually running <dark_red>/whenhideout</dark_red> or <dark_red>/whenradio</dark_red> in a bit!");

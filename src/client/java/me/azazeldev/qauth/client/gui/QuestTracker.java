@@ -94,7 +94,6 @@ public class QuestTracker extends Screen {
         header.defaultCellSetting().alignHorizontallyCenter();
         header.addChild(new StringWidget(this.getTitle(), this.font));
 
-
         int tabSize = this.width / Config.quests.keySet().size();
         this.tabBar = header.addChild(LinearLayout.horizontal().spacing(0));
         tabBar.newCellSettings().alignHorizontallyCenter();
@@ -174,7 +173,8 @@ public class QuestTracker extends Screen {
     public static boolean showGUI(String cmd) {
         Screen s = Minecraft.getInstance().screen;
         if (s != null && !(s.getClass() == ChatScreen.class || s.getTitle().getString().toLowerCase().contains("profile") || s.getClass() == QuestTracker.class)) return true;
-        if (!shouldOpenQT && StateManager.getState() == StateManager.AuthState.LOBBY) Minecraft.getInstance().player.connection.sendCommand("profile"); // refetch quests on open
+        if (StateManager.getState() == StateManager.AuthState.LOBBY) if (!shouldOpenQT) Minecraft.getInstance().player.connection.sendCommand("profile"); // refetch quests on open
+        else QuestTracker.showGUI(String.format("quests_fetched %s %s", MainClient.lastNPC, 0));
         shouldOpenQT = true;
         if (cmd.startsWith("quests_fetched")) { // FIXME: ugly workaround
             shouldOpenQT = false;

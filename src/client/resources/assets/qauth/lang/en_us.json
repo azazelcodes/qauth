@@ -12,5 +12,11 @@
     "qauth.config.ui.extra": "Extra HUD",
       "qauth.config.ui.quest": "Quest Tracker",
       "qauth.config.ui.event": "Event Timer",
-    "qauth.config.ui.flip": "Flip elements"
+    "qauth.config.ui.flip": "Flip elements",
+
+  "qauth.config.util": "Utility",
+    "qauth.config.util.keepextract": "Keep extract command as last sent",
+    "qauth.config.util.alldrop": "Always drop full stack",
+    "qauth.config.util.handdrop": "Don't drop held item",
+    "qauth.config.util.hideni": "Hide players around interactibles"
 }

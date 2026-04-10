@@ -18,12 +18,13 @@ import java.util.Map;
 
 public class StashTracker {
     private static final Identifier HOTBAR_TEXTURE = Identifier.fromNamespaceAndPath("qauth", "textures/gui/hotbar_texture.png");
-    public static String[] nostash = {" ", "Upgrade"};
+    public static String[] nostash = {" ", "Upgrade"}; // FIXME: add next / prev page
     public static void StashPreview(GuiGraphics graphics, DeltaTracker delta) {
         if (!Config.renderStash) return;
-        List<Map.Entry<Integer, ItemStack>> stash = Config.stash.entrySet().stream().filter(e -> !e.getValue().isEmpty()).toList();
         int slotSize = (int) (0.75f * 24);
         Window window = Minecraft.getInstance().getWindow();
+
+        List<ItemStack> stash = Config.stash.stream().filter(i -> !i.isEmpty()).toList();
 
         graphics.pose().pushMatrix();
         graphics.pose().scale(Config.slotSize * 0.75f);
@@ -36,22 +37,22 @@ public class StashTracker {
         graphics.pose().popMatrix();
 
         int i = 0;
-        for (Map.Entry<Integer, ItemStack> e : stash) { // FIXME: CENTER THESE BETTER!! fwiquin hud changes. 1.21 was so much better </3
+        for (ItemStack e : stash) { // FIXME: CENTER THESE BETTER!! fwiquin hud changes. 1.21 was so much better </3
             int ix = (int) (Config.flipHUD ? window.getGuiScaledWidth() / Config.slotSize - 9 * slotSize - 2 + (i % 9) * slotSize : 2 + (i % 9) * slotSize);
             int iy = 2 + (int) Math.floor((double) i / 9) * slotSize;
             graphics.pose().pushMatrix();
             graphics.pose().scale(Config.slotSize);
             graphics.renderItem(
-                    e.getValue(),
+                    e,
                     ix, iy
             );
             i++;
-            if (e.getValue().getCount() <= 1) {
+            if (e.getCount() <= 1) {
                 graphics.pose().popMatrix();
                 continue;
             }
             Font font = Minecraft.getInstance().font;
-            graphics.textRenderer().accept(ix + slotSize - font.width(String.valueOf(e.getValue().getCount())) - 1, iy + slotSize - font.lineHeight - 1, MainClient.nativifyKyori(MiniMessage.miniMessage().deserialize("<gray><amount>", Placeholder.unparsed("amount",String.valueOf(e.getValue().getCount())))));
+            graphics.textRenderer().accept(ix + slotSize - font.width(String.valueOf(e.getCount())) - 1, iy + slotSize - font.lineHeight - 1, MainClient.nativifyKyori(MiniMessage.miniMessage().deserialize("<gray><amount>", Placeholder.unparsed("amount",String.valueOf(e.getCount())))));
             graphics.pose().popMatrix();
         }
     }

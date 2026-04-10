@@ -11,6 +11,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.kyori.adventure.audience.Audience;
@@ -59,7 +60,8 @@ public class MainClient implements ClientModInitializer {
         CommandHandler.popCmds();
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandHandler.registerBrigadier(dispatcher));
 
-        ClientTickEvents.START_WORLD_TICK.register((tick) -> {
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            StateManager.setState(StateManager.AuthState.OFFLINE);
             @Nullable ServerData server = Minecraft.getInstance().getCurrentServer();
             if (server == null) return;
             if (Minecraft.getInstance().isSingleplayer()) return;
