@@ -120,6 +120,13 @@ public class Config {
                                         .build()
                                 )
 
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Component.translatable("qauth.config.util.droppickup"))
+                                        .binding(false, () -> dropPickup, newVal -> dropPickup = newVal)
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+
                                 .build()
                         )
                         .build()
@@ -157,6 +164,8 @@ public class Config {
     public static boolean noDropHand = true;
     @SerialEntry
     public static boolean hideNearInteract = false;
+    @SerialEntry
+    public static boolean dropPickup = false;
 
 
 

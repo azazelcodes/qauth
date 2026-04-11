@@ -14,7 +14,7 @@
       "me.azazeldev.qauth.client.MainClient"
     ],
     "modmenu": [
-      "me.azazeldev.qauth.client.ModMenuIntegration"
+      "me.azazeldev.qauth.client.Compatibility"
     ]
   },
   "mixins": [
@@ -29,5 +29,8 @@
     "fabric-api": "*",
     "minecraft": "~1.21.11",
     "yet_another_config_lib_v3": ">=3.8.2"
+  },
+  "suggests": {
+    "raised": "5.1.2"
   }
 }

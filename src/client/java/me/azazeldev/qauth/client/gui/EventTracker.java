@@ -1,6 +1,7 @@
 package me.azazeldev.qauth.client.gui;
 
 import com.mojang.blaze3d.platform.Window;
+import me.azazeldev.qauth.client.Compatibility;
 import me.azazeldev.qauth.client.Config;
 import me.azazeldev.qauth.client.MainClient;
 import me.azazeldev.qauth.client.StateManager;
@@ -50,7 +51,7 @@ public class EventTracker {
          * wait until a message related to event trigger passes
          * this could be:
          * - hideout: "&kXXX s hideout is unlocking" ?
-         * - radio: "\n\n! The virtue building radio control is about to unlock!\n\n" / "\n\n! The virtue building radio control is now unlocked\n\n"
+         * - radio: "! The virtue building radio control is locking!, gas will fill the room in 3 seconds."
          */
         if (StateManager.getState() == StateManager.AuthState.OFFLINE) return;
         if (triedRefresh) { // FIXME: this is ugly and temporary, make it refresh automatically on a 10min timer
@@ -72,6 +73,9 @@ public class EventTracker {
         }
         Window window = Minecraft.getInstance().getWindow();
         Font font = Minecraft.getInstance().font;
+
+        graphics.pose().pushMatrix();
+        Compatibility.translate(graphics, "events");
         int i = 0;
         for (Map.Entry<String, Long> e : timers.entrySet()) {
             long when = e.getValue() - Instant.now().toEpochMilli();
@@ -81,5 +85,6 @@ public class EventTracker {
             graphics.drawString(font, c, x, window.getGuiScaledHeight()-(4+i*font.lineHeight), 0xFFFFFFFF, true);
             i++;
         }
+        graphics.pose().popMatrix();
     }
 }

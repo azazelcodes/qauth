@@ -1,6 +1,7 @@
 package me.azazeldev.qauth.client.gui;
 
 import com.mojang.blaze3d.platform.Window;
+import me.azazeldev.qauth.client.Compatibility;
 import me.azazeldev.qauth.client.Config;
 import me.azazeldev.qauth.client.MainClient;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -27,6 +28,7 @@ public class StashTracker {
         List<ItemStack> stash = Config.stash.stream().filter(i -> !i.isEmpty()).toList();
 
         graphics.pose().pushMatrix();
+        Compatibility.translate(graphics, "stash");
         graphics.pose().scale(Config.slotSize * 0.75f);
         graphics.blit(RenderPipelines.GUI_TEXTURED, HOTBAR_TEXTURE,
                 (int) (Config.flipHUD ? window.getGuiScaledWidth() * (1 / 0.75f) / Config.slotSize - 9 * 24 - 2 : 2), 2,
@@ -41,6 +43,7 @@ public class StashTracker {
             int ix = (int) (Config.flipHUD ? window.getGuiScaledWidth() / Config.slotSize - 9 * slotSize - 2 + (i % 9) * slotSize : 2 + (i % 9) * slotSize);
             int iy = 2 + (int) Math.floor((double) i / 9) * slotSize;
             graphics.pose().pushMatrix();
+            Compatibility.translate(graphics, "stash");
             graphics.pose().scale(Config.slotSize);
             graphics.renderItem(
                     e,

@@ -6,10 +6,12 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import me.azazeldev.qauth.client.gui.QuestTracker;
+import me.azazeldev.qauth.client.gui.StatTracker;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
+import net.minecraft.world.entity.EntityType;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
@@ -68,7 +70,9 @@ public class CommandHandler {
     private static boolean EMPTY(String cmd) { return false; }
 
     private static boolean test(String cmd) {
-        Minecraft.getInstance().player.connection.sendChat("/stash");
+        StatTracker.kills.put(EntityType.ZOMBIE, 999);
+        StatTracker.kills.put(EntityType.PLAYER, 99);
+        StatTracker.kills.put(EntityType.VINDICATOR, 9999);
         return true;
     }
 }

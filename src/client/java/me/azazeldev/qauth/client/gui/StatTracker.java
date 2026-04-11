@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JavaOps;
+import me.azazeldev.qauth.client.Compatibility;
 import me.azazeldev.qauth.client.Config;
 import me.azazeldev.qauth.client.MainClient;
 import me.azazeldev.qauth.client.StateManager;
@@ -44,13 +45,18 @@ public class StatTracker { // TODO: add kills
         Window window = Minecraft.getInstance().getWindow();
         String s = Instant.ofEpochMilli(Instant.now().toEpochMilli() - StateManager.stateChanged).toString().substring(11, 19);
         int x = (window.getGuiScaledWidth() - Minecraft.getInstance().font.width(s)) / 2;
+        graphics.pose().pushMatrix();
+        Compatibility.translate(graphics, "timer");
         graphics.drawString(Minecraft.getInstance().font, Component.literal(s), x, 4, 0xFFFFFFFF);
+        graphics.pose().popMatrix();
     }
 
     public static void KillPreview(GuiGraphics graphics, DeltaTracker delta) {
         if (kills.isEmpty()) return;
         if (Minecraft.getInstance().level == null) return;
 
+        graphics.pose().pushMatrix();
+        Compatibility.translate(graphics, "stash");
         int i = 0;
         for (Map.Entry<EntityType<?>, Integer> e : kills.entrySet()) {
             ItemStack r = switch (e.getKey().toString()) { // cba to make this not .toString
@@ -70,6 +76,7 @@ public class StatTracker { // TODO: add kills
             graphics.drawString(Minecraft.getInstance().font, Component.literal(String.valueOf(e.getValue())), x, i*16 + 4, 0xFFFFFFFF); // maybe make this gray? idrk
             i++;
         }
+        graphics.pose().popMatrix();
 
         /*LivingEntity living = new Zombie(EntityType.ZOMBIE, Minecraft.getInstance().level);
         int s = 15;

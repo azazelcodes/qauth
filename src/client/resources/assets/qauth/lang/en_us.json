@@ -18,5 +18,6 @@
     "qauth.config.util.keepextract": "Keep extract command as last sent",
     "qauth.config.util.alldrop": "Always drop full stack",
     "qauth.config.util.handdrop": "Don't drop held item",
-    "qauth.config.util.hideni": "Hide players around interactibles"
+    "qauth.config.util.hideni": "Hide players around interactibles",
+    "qauth.config.util.droppickup": "Drop items on pickup"
 }

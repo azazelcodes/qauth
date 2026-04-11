@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Player.class)
-public class AttackMixin { // TODO: possibly account for fire aspect or other applied effects
+public class AttackMixin { // TODO: possibly account for fire aspect or other applied effects, probably better to move to getStats on enter raid
     @Inject(method = "attack(Lnet/minecraft/world/entity/Entity;)V", at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/entity/player/Player;causeExtraKnockback(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/phys/Vec3;)V"

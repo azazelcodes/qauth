@@ -19,6 +19,11 @@ repositories {
         name 'Xander Maven'
         url 'https://maven.isxander.dev/releases'
     }
+
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
 }
 
 loom {
@@ -47,6 +52,8 @@ dependencies {
     // CONFIG
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+    modImplementation "maven.modrinth:raised:${project.raised_version}"
 }
 
 processResources {

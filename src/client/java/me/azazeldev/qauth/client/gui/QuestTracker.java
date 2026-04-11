@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.Window;
 import me.azazeldev.qauth.Main;
+import me.azazeldev.qauth.client.Compatibility;
 import me.azazeldev.qauth.client.Config;
 import me.azazeldev.qauth.client.MainClient;
 import me.azazeldev.qauth.client.StateManager;
@@ -64,12 +65,16 @@ public class QuestTracker extends Screen {
         if (trackedQuest == null) return;
         Window window = Minecraft.getInstance().getWindow();
         Font font = Minecraft.getInstance().font;
+
+        graphics.pose().pushMatrix();
+        Compatibility.translate(graphics, "quests");
         int i = 0;
         for (Component c : componentifyQuest(trackedQuest)) { // FIXME: move this to an actual tracker using AttackMixin for kills, Inventory.contains() for hand_in, raid collection by tracking items in containermixin during raid state for collect, area checking with area api (WIP) and rc detection
             int x = !Config.flipHUD ? window.getGuiScaledWidth() - font.width(c) -4 : 4;
             graphics.drawString(font, c, x, 4+i*font.lineHeight, 0xFFFFFFFF, true);
             i++;
         }
+        graphics.pose().popMatrix();
     }
 
 
