@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import me.azazeldev.qauth.client.Config;
 import me.azazeldev.qauth.client.MainClient;
 import me.azazeldev.qauth.client.StateManager;
+import me.azazeldev.qauth.client.gui.StatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,7 +25,7 @@ public class AttackMixin { // TODO: possibly account for fire aspect or other ap
     ))
     private void onHit(Entity target, CallbackInfo ci) {
         if (!(target instanceof LivingEntity livingTarget)) return;
-        if (livingTarget.isDeadOrDying()) StateManager.incrementKills(livingTarget.getType());
+        if (livingTarget.isDeadOrDying()) StatTracker.incrementKills(livingTarget.getType());
     }
 
     @Inject(method = "doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;F)V", at = @At(
@@ -34,6 +35,6 @@ public class AttackMixin { // TODO: possibly account for fire aspect or other ap
     ))
     private void onSweep(Entity entity, float baseDamage, DamageSource damageSource, float attackStrengthScale, CallbackInfo ci,
                          @Local LivingEntity nearby) {
-        if (nearby.isDeadOrDying()) StateManager.incrementKills(nearby.getType());
+        if (nearby.isDeadOrDying()) StatTracker.incrementKills(nearby.getType());
     }
 }

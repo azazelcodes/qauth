@@ -7,6 +7,7 @@ import me.azazeldev.qauth.Main;
 import me.azazeldev.qauth.client.gui.EventTracker;
 import me.azazeldev.qauth.client.gui.QuestTracker;
 import me.azazeldev.qauth.client.gui.StashTracker;
+import me.azazeldev.qauth.client.gui.StatTracker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -72,6 +73,8 @@ public class MainClient implements ClientModInitializer {
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "stash_preview"), StashTracker::StashPreview); // FIXME: draw above all screens, even containers - how? idk
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "quest_preview"), QuestTracker::QuestPreview);
         //HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "event_preview"), EventTracker::EventPreview);
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "time_preview"), StatTracker::TimePreview);
+        HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, Identifier.fromNamespaceAndPath(Main.MOD_ID, "kill_preview"), StatTracker::KillPreview);
     }
 
     public static void sendClient(String msg) {

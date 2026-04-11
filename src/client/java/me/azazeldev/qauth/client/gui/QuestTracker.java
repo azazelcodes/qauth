@@ -7,6 +7,8 @@ import me.azazeldev.qauth.Main;
 import me.azazeldev.qauth.client.Config;
 import me.azazeldev.qauth.client.MainClient;
 import me.azazeldev.qauth.client.StateManager;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -191,7 +193,7 @@ public class QuestTracker extends Screen {
 
         components.add(MainClient.nativifyMiniMessage("<italic><underlined><dark_gray>ᴄᴏɴᴅɪᴛɪᴏɴꜱ"));
         for (Map.Entry<String, JsonElement> condition : quest.get("cond").getAsJsonObject().entrySet()) {
-            components.add(Component.literal(MainClient.capitalize(condition.getKey())).withStyle(ChatFormatting.GRAY).append(" ").append(Component.literal(stringifyCondition(condition)).withColor(0xFFFFFFFF))); // todo: move to minimessage
+            components.add(MainClient.nativifyKyori(MiniMessage.miniMessage().deserialize("<gray><name> <white><data>", Placeholder.unparsed("name", condition.getKey()), Placeholder.unparsed("data", stringifyCondition(condition)))));
         }
 
         components.add(MainClient.nativifyMiniMessage("<italic><underlined><dark_gray>ᴄᴏɴᴅɪᴛɪᴏɴꜱ"));
