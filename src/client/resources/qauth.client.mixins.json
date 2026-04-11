@@ -6,8 +6,7 @@
   "client": [
     "CPlayerMixin",
     "EntityRendererMixin",
-    "PacketMixin",
-    "PlayerRendererMixin"
+    "PacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -26,6 +26,7 @@ public class PlayerRendererMixin<AvatarlikeEntity extends Avatar & ClientAvatarE
         for (int i = 0; i < 3; i++) args.set(i,0);
     }*/
 
+    // dont know why this one is not allowed but coolness and karthy said no :(
     @Inject(method = "shouldShowName(Lnet/minecraft/world/entity/Avatar;D)Z", at =  @At("RETURN"), cancellable = true)
     private void showName(AvatarlikeEntity avatar, double d, CallbackInfoReturnable<Boolean> ci) { if (StateManager.getState() == StateManager.AuthState.LOBBY) ci.setReturnValue(true); }
 }

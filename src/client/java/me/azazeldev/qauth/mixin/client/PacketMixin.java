@@ -36,10 +36,11 @@ public class PacketMixin {
             value = "INVOKE",
             target = "Lnet/minecraft/client/multiplayer/chat/ChatListener;handleSystemMessage(Lnet/minecraft/network/chat/Component;Z)V",
             shift = At.Shift.BEFORE
-    ))
+    ), cancellable = true)
     private void onSChat(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
         List<Component> l = clientboundSystemChatPacket.content().toFlatList();
         String f = l.getFirst().getString();
+        if (f.startsWith("Hey!")) ci.cancel();
         // if (f.contains("active")) EventTracker.refresh(); // TODO:
         if (f.contains("cooldown:")) EventTracker.parse(l.getLast().getString(), f);
     }
