@@ -59,6 +59,7 @@ public class StateManager {
 
     private static void enterLeaveRaid() {
         stateChanged = Instant.now().toEpochMilli();
+        // FIXME: entering raid should add +2s because we go off the timer hitting 1, not starting. we could track since timer 3?
         // Minecraft.getInstance().player.getStats(Stats.MOB_KILLS) // TODO: save stat kills to stattracker, useless because I have noticed player kills are not counted
     }
 }

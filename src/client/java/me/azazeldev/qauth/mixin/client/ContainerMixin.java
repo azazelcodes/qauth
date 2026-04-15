@@ -25,7 +25,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -94,16 +93,23 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
     ))
     public void renderItemBarrel(final GuiGraphics graphics, final Slot slot, final int mouseX, final int mouseY, CallbackInfo ci) {
         if (menu.containerId == 0) return; // player inv
-        if (StateManager.getState() != StateManager.AuthState.RAID) return;
         if (slot.getItem().isEmpty()) return;
         if (!Config.markBarrels) return;
-        if (slot.index >= menu.slots.size()-9*4) return;
+        graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, determineCol(slot));
+    }
+    @Unique
+    private int determineCol(final Slot slot) {
         int col = 0x00FFFFFF;
+
+        if (Config.invaluables.contains(slot.getItem().getItem())) col = 0xA8FF0000; // render even in inv
+        if (Config.valuables.contains(slot.getItem().getItem())) col = 0xA8FFFF00;
+
+        if (slot.index >= menu.slots.size()-(9*4+1)) return col;
+        if (StateManager.getState() != StateManager.AuthState.RAID) return col;
 
         if (stashables.contains(slot.getItem().getItem())) col = 0xA80000FF;
         if (minecraft.player.getInventory().contains(slot.getItem())) col = 0xA800FF00;
-        if (Config.valuables.contains(slot.getItem().getItem())) col = 0xA8FFFF00;
-        graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, col);
+        return col;
     }
 
     // stash tracker
@@ -151,12 +157,18 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
         if (!quest.equals("Not Started")) QuestTracker.fetchQuest(qnpc, quest);
     }
 
-    @Inject(method = "keyPressed(Lnet/minecraft/client/input/KeyEvent;)Z", at = @At("HEAD"))
+    @Inject(method = "keyPressed(Lnet/minecraft/client/input/KeyEvent;)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> ci) {
+        if (getHoveredSlot() == null) return;
+        ItemStack hover = getHoveredSlot().getItem();
+        if (hover.isEmpty()) return;
         if (MainClient.markValuable.matches(event)) {
             MainClient.markValuable.consumeClick();
-            ItemStack hover = getHoveredSlot().getItem();
-            if (!hover.isEmpty()) Config.toggleItem(Config.valuables, hover.getItem());
+            Config.toggleItem(Config.valuables, hover.getItem());
+            ci.setReturnValue(true);
+        } else if (MainClient.markInvaluable.matches(event)) {
+            MainClient.markInvaluable.consumeClick();
+            Config.toggleItem(Config.invaluables, hover.getItem());
             ci.setReturnValue(true);
         }
     }
@@ -165,6 +177,13 @@ public abstract class ContainerMixin<T extends AbstractContainerMenu> extends Sc
     private int modifyDropped(int modify, Slot slot, int i, int j, ClickType clickType) {
         if (clickType.equals(ClickType.THROW) && Config.alwaysAllDrop) return 1;
         return modify;
+    }
+
+    @Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V", at = @At("HEAD"), cancellable = true)
+    private void unclick(Slot slot, int i, int j, ClickType clickType, CallbackInfo ci) {
+        if (slot == null) return;
+        if (slot.index > menu.slots.size()-(9*4+1)) return; // dont trigger if transferring from player inv
+        if (Config.invaluables.contains(slot.getItem().getItem())) ci.cancel();
     }
 
     @Inject(method = "onClose", at = @At("RETURN"))

@@ -172,6 +172,7 @@ public class Config {
     // this is just to save data, not for "configuration"
     @SerialEntry
     public static List<Item> valuables = Lists.newArrayList(Items.TWISTING_VINES, Items.PRISMARINE_SHARD, Items.BLAZE_ROD, Items.BREEZE_ROD);
+    public static List<Item> invaluables = Lists.newArrayList();
     @SerialEntry // FIXME: not serializable because of Option<>
     public static List<ItemStack> stash = Lists.newArrayList(); // FIXME: if possible, move to list
     @SerialEntry

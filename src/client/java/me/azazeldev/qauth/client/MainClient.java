@@ -42,6 +42,7 @@ public class MainClient implements ClientModInitializer {
     private static String[] ips = {"unauth.xyz","130.12.33.16"};
 
     public static KeyMapping markValuable;
+    public static KeyMapping markInvaluable;
 
     public static String lastNPC;
 
@@ -55,6 +56,14 @@ public class MainClient implements ClientModInitializer {
                         "key.qauth.mark_valuable",
                         InputConstants.Type.KEYSYM,
                         GLFW.GLFW_KEY_R,
+                        MAIN_CATEGORY
+                )
+        );
+        markInvaluable = KeyBindingHelper.registerKeyBinding(
+                new KeyMapping(
+                        "key.qauth.mark_invaluable",
+                        InputConstants.Type.KEYSYM,
+                        GLFW.GLFW_KEY_X,
                         MAIN_CATEGORY
                 )
         );
